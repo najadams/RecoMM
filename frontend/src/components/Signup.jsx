@@ -1,25 +1,42 @@
 import React, { useState } from 'react';
 import './Auth.css';
+import { useAuth } from '../contexts/AuthContext';
 import ladyReading from '../assets/ladyReading.png';
 import manReading from '../assets/kidBehindBook.png';
 import flyingWithBook from '../assets/flyingWithBook.png';
 
 const Signup = ({ onSwitchToLogin }) => {
+  const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    // Client-side validation
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
+      setLoading(false);
       return;
     }
-    // Handle signup logic here
-    console.log('Signup:', { email, username, password });
+
+    try {
+      const formData = { email, username, password, confirmPassword };
+      await register(formData);
+      // User will be automatically redirected to dashboard via AuthContext
+    } catch (error) {
+      setError(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,7 +76,10 @@ const Signup = ({ onSwitchToLogin }) => {
                 type="email"
                 placeholder="Enter Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError('');
+                }}
                 required
               />
             </div>
@@ -72,7 +92,10 @@ const Signup = ({ onSwitchToLogin }) => {
                 type="text"
                 placeholder="Enter Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (error) setError('');
+                }}
                 required
               />
             </div>
@@ -85,7 +108,10 @@ const Signup = ({ onSwitchToLogin }) => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Create Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError('');
+                }}
                 required
               />
               <button
@@ -105,7 +131,10 @@ const Signup = ({ onSwitchToLogin }) => {
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm Password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (error) setError('');
+                }}
                 required
               />
               <button
@@ -118,8 +147,10 @@ const Signup = ({ onSwitchToLogin }) => {
             </div>
           </div>
 
-          <button type="submit" className="auth-button signup-button">
-            SIGN UP
+          {error && <div className="error-message">{error}</div>}
+
+          <button type="submit" className="auth-button signup-button" disabled={loading}>
+            {loading ? 'SIGNING UP...' : 'SIGN UP'}
           </button>
 
           <div className="social-login">

@@ -1,19 +1,42 @@
 import React, { useState } from 'react';
 import './Auth.css';
+import { useAuth } from '../contexts/AuthContext';
 import ladyReading from '../assets/ladyReading.png';
 import manReading from '../assets/kidBehindBook.png';
 import flyingWithBook from '../assets/flyingWithBook.png';
-import find from '../assets/find.jpeg';
 
 const Login = ({ onSwitchToSignup }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login:', { username, password });
+    setLoading(true);
+    setError('');
+
+    try {
+      await login(formData);
+      // User will be automatically redirected to dashboard via AuthContext
+    } catch (error) {
+      setError(error.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,14 +67,17 @@ const Login = ({ onSwitchToSignup }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          {error && <div className="error-message">{error}</div>}
+
           <div className="input-group">
             <div className="input-wrapper">
               <span className="input-icon">👤</span>
               <input
-                type="text"
-                placeholder="Enter Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                name="email"
+                placeholder="Enter Email"
+                value={formData.email}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -62,9 +88,10 @@ const Login = ({ onSwitchToSignup }) => {
               <span className="input-icon">🔒</span>
               <input
                 type={showPassword ? 'text' : 'password'}
+                name="password"
                 placeholder="Enter Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 required
               />
               <button
@@ -77,8 +104,8 @@ const Login = ({ onSwitchToSignup }) => {
             </div>
           </div>
 
-          <button type="submit" className="auth-button login-button">
-            LOGIN
+          <button type="submit" className="auth-button login-button" disabled={loading}>
+            {loading ? 'LOGGING IN...' : 'LOGIN'}
           </button>
 
           <a href="#" className="forgot-password">Forgot Password</a>
