@@ -1,0 +1,413 @@
+/* Auth Container */
+.auth-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f4d03f 0%, #f7dc6f 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Decorative Elements */
+.decorative-elements {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lady-reading {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  height: auto;
+  animation: float 3s ease-in-out infinite;
+}
+
+.man-reading {
+  position: absolute;
+  bottom: 0;
+  right: 5%;
+  width: 250px;
+  height: auto;
+  /* animation: float 3s ease-in-out infinite; */
+}
+
+.flying-book {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  width: 320px;
+  height: auto;
+  animation: float 3s ease-in-out infinite;
+}
+
+.read-nice-books {
+  position: absolute;
+  bottom: 20%;
+  left: 5%;
+  background: #2ecc71;
+  color: white;
+  padding: 20px;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Header */
+.auth-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  z-index: 10;
+  position: relative;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.book-club-logo {
+  background: #e74c3c;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 10px;
+  font-weight: bold;
+  width: 50px;
+  height: 50px;
+  justify-content: center;
+}
+
+.book-text {
+  line-height: 1;
+}
+
+.club-text {
+  line-height: 1;
+}
+
+.logo-name-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.logo-name {
+  background: #f39c12;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.dimensions {
+  background: #3498db;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.book-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+}
+
+/* Main Form Container */
+.auth-form-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 700px;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  position: relative;
+  width: 60%;
+  margin: 0 auto;
+  background: rgba(78, 156, 208, 0.95);
+  border-radius: 30px;
+  padding: 40px;
+  margin-top: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.welcome-section h1 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  text-transform: lowercase;
+}
+
+
+/* .login-subtitle {
+  background: #f39c12;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 0;
+} */
+
+/* Form Styles */
+.auth-form {
+  width: 100%;
+  max-width: 400px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 25px;
+  padding: 0 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.input-icon {
+  margin-right: 15px;
+  font-size: 18px;
+}
+
+.input-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 15px 0;
+  font-size: 16px;
+  background: transparent;
+  color: #2c3e50;
+}
+
+.input-wrapper input::placeholder {
+  color: #7f8c8d;
+}
+
+.password-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  margin-left: 10px;
+}
+
+/* Buttons */
+.auth-button {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.login-button {
+  background: #f39c12;
+  color: white;
+}
+
+.signup-button {
+  background: #3498db;
+  color: white;
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.forgot-password {
+  color: #3498db;
+  text-decoration: none;
+  font-style: italic;
+  display: block;
+  text-align: center;
+  margin: 10px 0 20px 0;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* Social Login */
+.social-login {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.login-with {
+  background: #f39c12;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social-btn {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-btn.google {
+  background: #db4437;
+  color: white;
+}
+
+.social-btn.apple {
+  background: #000;
+  color: white;
+}
+
+.social-btn.facebook {
+  background: #4267B2;
+  color: white;
+}
+
+.social-btn.twitter {
+  background: #1DA1F2;
+  color: white;
+}
+
+.social-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Switch Auth */
+.switch-auth {
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 20px;
+}
+
+.switch-link {
+  background: none;
+  border: none;
+  color: #27ae60;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+.switch-link:hover {
+  color: #2ecc71;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 10px;
+  }
+  
+  .auth-header {
+    padding: 15px 20px;
+  }
+  
+  .auth-form-container {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+  
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
+  
+  .lady-reading {
+    width: 200px;
+  }
+  
+  .man-reading {
+    width: 180px;
+  }
+  
+  .flying-book {
+    width: 80px;
+  }
+  
+  .read-nice-books {
+    width: 80px;
+    height: 80px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-form-container {
+    margin: 10px;
+    padding: 20px 15px;
+  }
+  
+  .welcome-section h1 {
+    font-size: 1.5rem;
+  }
+  
+  .social-buttons {
+    gap: 10px;
+  }
+  
+  .social-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
