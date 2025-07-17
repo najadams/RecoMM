@@ -15,11 +15,13 @@ const Signup = ({ onSwitchToLogin }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     // Client-side validation
     if (password !== confirmPassword) {
@@ -28,9 +30,16 @@ const Signup = ({ onSwitchToLogin }) => {
       return;
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const formData = { email, username, password, confirmPassword };
       await register(formData);
+      setSuccess('Account created successfully! Redirecting to dashboard...');
       // User will be automatically redirected to dashboard via AuthContext
     } catch (error) {
       setError(error.message || 'Registration failed. Please try again.');
@@ -79,6 +88,7 @@ const Signup = ({ onSwitchToLogin }) => {
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (error) setError('');
+                  if (success) setSuccess('');
                 }}
                 required
               />
@@ -95,6 +105,7 @@ const Signup = ({ onSwitchToLogin }) => {
                 onChange={(e) => {
                   setUsername(e.target.value);
                   if (error) setError('');
+                  if (success) setSuccess('');
                 }}
                 required
               />
@@ -111,6 +122,7 @@ const Signup = ({ onSwitchToLogin }) => {
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (error) setError('');
+                  if (success) setSuccess('');
                 }}
                 required
               />
@@ -134,6 +146,7 @@ const Signup = ({ onSwitchToLogin }) => {
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
                   if (error) setError('');
+                  if (success) setSuccess('');
                 }}
                 required
               />
@@ -148,6 +161,7 @@ const Signup = ({ onSwitchToLogin }) => {
           </div>
 
           {error && <div className="error-message">{error}</div>}
+          {success && <div className="success-message">{success}</div>}
 
           <button type="submit" className="auth-button signup-button" disabled={loading}>
             {loading ? 'SIGNING UP...' : 'SIGN UP'}

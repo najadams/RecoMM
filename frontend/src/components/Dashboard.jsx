@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import MyBooks from './MyBooks';
+import Feedback from './Feedback';
+import ContactUs from './ContactUs';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentView, setCurrentView] = useState('home');
 
   const handleLogout = async () => {
     try {
@@ -28,6 +32,21 @@ const Dashboard = () => {
     { title: 'A LAND OF WONDERS', author: 'Various', cover: '/api/placeholder/120/180', rating: 4.2 }
   ];
 
+  // If user is viewing My Books, render the MyBooks component
+  if (currentView === 'mybooks') {
+    return <MyBooks onNavigate={setCurrentView} />;
+  }
+
+  // If user is viewing Feedback, render the Feedback component
+  if (currentView === 'feedback') {
+    return <Feedback onNavigate={setCurrentView} />;
+  }
+
+  // If user is viewing Contact Us, render the ContactUs component
+  if (currentView === 'contact') {
+    return <ContactUs onNavigate={setCurrentView} />;
+  }
+
   return (
     <div className="library-dashboard">
       {/* Header */}
@@ -42,11 +61,11 @@ const Dashboard = () => {
           </div>
         </div>
         <nav className="main-nav">
-          <a href="#" className="nav-link active">Home</a>
-          <a href="#" className="nav-link">My Books</a>
-          <a href="#" className="nav-link">Feedback</a>
-          <a href="#" className="nav-link">Contact US</a>
-        </nav>
+           <a href="#" className={`nav-link ${currentView === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('home'); }}>Home</a>
+           <a href="#" className={`nav-link ${currentView === 'mybooks' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('mybooks'); }}>My Books</a>
+           <a href="#" className={`nav-link ${currentView === 'feedback' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('feedback'); }}>Feedback</a>
+           <a href="#" className={`nav-link ${currentView === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('contact'); }}>Contact US</a>
+         </nav>
         <div className="header-right">
           <div className="user-avatar" onClick={handleLogout} title="Logout">
             <img src="/api/placeholder/40/40" alt="User" />

@@ -1,6 +1,6 @@
 .library-dashboard {
   min-height: 100vh;
-  background: #f5e6a3;
+  background: rgba(255, 245, 153, 1);
   font-family: 'Arial', sans-serif;
 }
 
@@ -10,7 +10,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: #f5e6a3;
+  background: rgba(255, 245, 153, 1);
   border-bottom: 1px solid #e0d080;
 }
 
@@ -105,7 +105,7 @@
 .library-section {
   text-align: center;
   padding: 2rem;
-  background: #f5e6a3;
+  background: rgba(255, 245, 153, 1);
 }
 
 .library-title {
