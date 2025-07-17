@@ -436,10 +436,11 @@
 
 /* Footer */
 .library-footer {
-  background: #2c3e50;
-  color: white;
+  color: rgba(38, 80, 115, 1);
+  background: rgba(255, 245, 153, 1);
   padding: 3rem 2rem 2rem;
   margin-top: 3rem;
+  box-shadow: -3px -2px 8px 0px rgba(0, 0, 0, 0.08);
 }
 
 .footer-content {
@@ -464,7 +465,7 @@
 
 .footer-section li {
   padding: 0.25rem 0;
-  color: #bdc3c7;
+  color: black;
   cursor: pointer;
   transition: color 0.3s ease;
 }

@@ -4,6 +4,7 @@ import MyBooks from './MyBooks';
 import Feedback from './Feedback';
 import ContactUs from './ContactUs';
 import './Dashboard.css';
+import avater from '../assets/avatar.jpg';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -68,7 +69,7 @@ const Dashboard = () => {
          </nav>
         <div className="header-right">
           <div className="user-avatar" onClick={handleLogout} title="Logout">
-            <img src="/api/placeholder/40/40" alt="User" />
+            <img src={avater} alt="User" />
           </div>
         </div>
       </header>

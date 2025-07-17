@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './MyBooks.css';
+import avatar from '../assets/avatar.jpg'
 
 const MyBooks = ({ onNavigate }) => {
   const { user, logout } = useAuth();
@@ -56,7 +57,7 @@ const MyBooks = ({ onNavigate }) => {
         </nav>
         <div className="header-right">
           <div className="user-avatar" onClick={handleLogout} title="Logout">
-            <img src="/api/placeholder/40/40" alt="User" />
+            <img src={avatar} alt="User" />
           </div>
         </div>
       </header>
