@@ -191,13 +191,11 @@
 
 .feedback-illustration {
   position: absolute;
-  width: 96px;
-  height: 96px;
-  top: 97px;
-  right: 90px;
+  width: 196px;
+  height: 196px;
+  top: 37px;
+  left: -30px;
   opacity: 1;
-  
-
 }
 
 .person-icon {

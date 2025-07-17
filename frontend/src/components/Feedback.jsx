@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './Feedback.css';
-import Find from '../assets/find.jpeg';
+import Find from '../assets/find.png';
 import Avater from '../assets/avatar.jpg';
 
 const Feedback = ({ onNavigate }) => {
