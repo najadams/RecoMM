@@ -131,6 +131,53 @@ class ApiService {
   isAuthenticated() {
     return !!this.getAuthToken();
   }
+
+  // Google Books API methods
+  async searchBooks(query, maxResults = 12) {
+    const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
+    const url = `${GOOGLE_BOOKS_API}?q=${encodeURIComponent(query)}&maxResults=${maxResults}&printType=books`;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch books from Google Books API');
+      }
+      const data = await response.json();
+      
+      return data.items?.map(item => ({
+        id: item.id,
+        title: item.volumeInfo.title || 'Unknown Title',
+        authors: item.volumeInfo.authors || ['Unknown Author'],
+        description: item.volumeInfo.description || 'No description available',
+        thumbnail: item.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || '/api/placeholder/120/180',
+        rating: item.volumeInfo.averageRating || 0,
+        ratingsCount: item.volumeInfo.ratingsCount || 0,
+        publishedDate: item.volumeInfo.publishedDate || 'Unknown',
+        pageCount: item.volumeInfo.pageCount || 0,
+        categories: item.volumeInfo.categories || [],
+        language: item.volumeInfo.language || 'en',
+        previewLink: item.volumeInfo.previewLink || '',
+        infoLink: item.volumeInfo.infoLink || ''
+      })) || [];
+    } catch (error) {
+      console.error('Google Books API Error:', error);
+      throw error;
+    }
+  }
+
+  async getTrendingBooks() {
+    // Get trending books by searching for popular categories
+    const trendingQueries = ['bestseller', 'popular fiction', 'new releases'];
+    const randomQuery = trendingQueries[Math.floor(Math.random() * trendingQueries.length)];
+    return await this.searchBooks(randomQuery, 6);
+  }
+
+  async getBookSuggestions() {
+    // Get book suggestions from various popular categories
+    const suggestionQueries = ['classic literature', 'science fiction', 'mystery', 'romance', 'biography', 'self help'];
+    const randomQuery = suggestionQueries[Math.floor(Math.random() * suggestionQueries.length)];
+    return await this.searchBooks(randomQuery, 6);
+  }
 }
 
 // Create and export a singleton instance
@@ -146,4 +193,7 @@ export const {
   updateProfile,
   changePassword,
   isAuthenticated,
+  searchBooks,
+  getTrendingBooks,
+  getBookSuggestions,
 } = apiService;
