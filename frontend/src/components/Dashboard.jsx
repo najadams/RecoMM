@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import MyBooks from './MyBooks';
 import Feedback from './Feedback';
 import ContactUs from './ContactUs';
+import apiService from '../services/api';
 import './Dashboard.css';
 import avater from '../assets/avatar.jpg';
 
@@ -10,6 +11,12 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentView, setCurrentView] = useState('home');
+  const [bookSuggestions, setBookSuggestions] = useState([]);
+  const [trendingBooks, setTrendingBooks] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -19,19 +26,74 @@ const Dashboard = () => {
     }
   };
 
-  const bookSuggestions = [
-    { title: 'THE AFRICAN MIND', author: 'Nathaniel Bassey', cover: '/api/placeholder/120/180' },
-    { title: 'Just One More Chapter', author: 'Various', cover: '/api/placeholder/120/180' },
-    { title: 'Americanah', author: 'Chimamanda Ngozi Adichie', cover: '/api/placeholder/120/180' },
-    { title: 'A Room Without Books', author: 'Various', cover: '/api/placeholder/120/180' },
-    { title: 'Things Fall Apart', author: 'Chinua Achebe', cover: '/api/placeholder/120/180' },
-    { title: 'THE AFRICAN MIND', author: 'Nathaniel Bassey', cover: '/api/placeholder/120/180' }
-  ];
+  // Load initial data when component mounts
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
-  const trendingBooks = [
-    { title: 'AFRO', author: 'Various', cover: '/api/placeholder/120/180', rating: 4.5 },
-    { title: 'A LAND OF WONDERS', author: 'Various', cover: '/api/placeholder/120/180', rating: 4.2 }
-  ];
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Load suggestions and trending books in parallel
+      const [suggestions, trending] = await Promise.all([
+        apiService.getBookSuggestions(),
+        apiService.getTrendingBooks()
+      ]);
+      
+      setBookSuggestions(suggestions);
+      setTrendingBooks(trending);
+    } catch (err) {
+      console.error('Error loading initial data:', err);
+      setError('Failed to load books. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle search functionality
+  const handleSearch = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+      const results = await apiService.searchBooks(query, 12);
+      setSearchResults(results);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('Search failed. Please try again.');
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('⭐');
+    }
+    if (hasHalfStar) {
+      stars.push('⭐');
+    }
+    
+    return stars.join('');
+  };
 
   // If user is viewing My Books, render the MyBooks component
   if (currentView === 'mybooks') {
@@ -139,43 +201,121 @@ const Dashboard = () => {
 
           {/* Main Content Area */}
           <div className="main-content">
-            {/* Suggestions Section */}
-            <section className="suggestions-section">
-              <div className="section-header">
-                <h2>Suggestions</h2>
-                <button className="auto-btn">🔄 AUTO</button>
+            {/* Error Message */}
+            {error && (
+              <div className="error-message">
+                <p>{error}</p>
+                <button onClick={loadInitialData} className="retry-btn">Retry</button>
               </div>
-              <div className="books-grid">
-                {bookSuggestions.map((book, index) => (
-                  <div key={index} className="book-card">
-                    <div className="book-cover">
-                      <img src={book.cover} alt={book.title} />
-                    </div>
-                    <div className="book-info">
-                      <h4>{book.title}</h4>
-                      <p>{book.author}</p>
-                    </div>
+            )}
+
+            {/* Search Results */}
+            {searchQuery && (
+              <section className="search-results-section">
+                <div className="section-header">
+                  <h2>Search Results for "{searchQuery}"</h2>
+                  {searchLoading && <span className="loading-spinner">🔄</span>}
+                </div>
+                {searchResults.length > 0 ? (
+                  <div className="books-grid">
+                    {searchResults.map((book) => (
+                      <div key={book.id} className="book-card">
+                        <div className="book-cover">
+                          <img src={book.thumbnail} alt={book.title} onError={(e) => {
+                            e.target.src = '/api/placeholder/120/180';
+                          }} />
+                        </div>
+                        <div className="book-info">
+                          <h4 title={book.title}>{book.title.length > 30 ? book.title.substring(0, 30) + '...' : book.title}</h4>
+                          <p title={book.authors.join(', ')}>{book.authors.join(', ')}</p>
+                          {book.rating > 0 && (
+                            <div className="book-rating">
+                              {renderStars(book.rating)} ({book.rating})
+                            </div>
+                          )}
+                          {book.description && (
+                            <p className="book-description" title={book.description}>
+                              {book.description.length > 100 ? book.description.substring(0, 100) + '...' : book.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
+                ) : !searchLoading && (
+                  <p className="no-results">No books found for "{searchQuery}"</p>
+                )}
+              </section>
+            )}
+
+            {/* Suggestions Section */}
+            {!searchQuery && (
+              <section className="suggestions-section">
+                <div className="section-header">
+                  <h2>Suggestions</h2>
+                  <button className="auto-btn" onClick={loadInitialData} disabled={loading}>🔄 AUTO</button>
+                </div>
+                {loading ? (
+                  <div className="loading-state">
+                    <p>Loading suggestions...</p>
+                  </div>
+                ) : (
+                  <div className="books-grid">
+                    {bookSuggestions.map((book) => (
+                      <div key={book.id} className="book-card">
+                        <div className="book-cover">
+                          <img src={book.thumbnail} alt={book.title} onError={(e) => {
+                            e.target.src = '/api/placeholder/120/180';
+                          }} />
+                        </div>
+                        <div className="book-info">
+                          <h4 title={book.title}>{book.title.length > 30 ? book.title.substring(0, 30) + '...' : book.title}</h4>
+                          <p title={book.authors.join(', ')}>{book.authors.join(', ')}</p>
+                          {book.rating > 0 && (
+                            <div className="book-rating">
+                              {renderStars(book.rating)} ({book.rating})
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* Trending Books */}
-            <section className="trending-section">
-              <h2>Trending Books</h2>
-              <div className="trending-grid">
-                {trendingBooks.map((book, index) => (
-                  <div key={index} className="trending-book">
-                    <div className="book-cover">
-                      <img src={book.cover} alt={book.title} />
-                    </div>
-                    <div className="book-rating">
-                      {'⭐'.repeat(Math.floor(book.rating))}
-                    </div>
+            {!searchQuery && (
+              <section className="trending-section">
+                <h2>Trending Books</h2>
+                {loading ? (
+                  <div className="loading-state">
+                    <p>Loading trending books...</p>
                   </div>
-                ))}
-              </div>
-            </section>
+                ) : (
+                  <div className="trending-grid">
+                    {trendingBooks.map((book) => (
+                      <div key={book.id} className="trending-book">
+                        <div className="book-cover">
+                          <img src={book.thumbnail} alt={book.title} onError={(e) => {
+                            e.target.src = '/api/placeholder/120/180';
+                          }} />
+                        </div>
+                        <div className="book-info">
+                          <h4 title={book.title}>{book.title.length > 25 ? book.title.substring(0, 25) + '...' : book.title}</h4>
+                          <p title={book.authors.join(', ')}>{book.authors.join(', ')}</p>
+                        </div>
+                        {book.rating > 0 && (
+                          <div className="book-rating">
+                            {renderStars(book.rating)} ({book.rating})
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
 
           {/* Reading Challenge Sidebar */}
