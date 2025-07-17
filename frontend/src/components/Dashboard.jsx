@@ -4,6 +4,7 @@ import MyBooks from './MyBooks';
 import Feedback from './Feedback';
 import ContactUs from './ContactUs';
 import BookDetails from './BookDetails';
+import Profile from './Profile';
 import apiService from '../services/api';
 import './Dashboard.css';
 import avater from '../assets/avatar.jpg';
@@ -130,6 +131,11 @@ const Dashboard = () => {
     return <ContactUs onNavigate={setCurrentView} />;
   }
 
+  // If user is viewing Profile, render the Profile component
+  if (currentView === 'profile') {
+    return <Profile onNavigate={setCurrentView} />;
+  }
+
   return (
     <div className="library-dashboard">
       {/* Header */}
@@ -150,7 +156,7 @@ const Dashboard = () => {
            <a href="#" className={`nav-link ${currentView === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('contact'); }}>Contact US</a>
          </nav>
         <div className="header-right">
-          <div className="user-avatar" onClick={handleLogout} title="Logout">
+          <div className="user-avatar" onClick={() => setCurrentView('profile')} title="Profile">
             <img src={avater} alt="User" />
           </div>
         </div>
