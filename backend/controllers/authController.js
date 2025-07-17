@@ -118,7 +118,7 @@ const login = async (req, res) => {
     }
 
     // Check password
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -260,7 +260,7 @@ const changePassword = async (req, res) => {
     const user = await User.findById(req.user.id).select('+password');
 
     // Check current password
-    const isMatch = await user.matchPassword(currentPassword);
+    const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {
       return res.status(400).json({
         success: false,

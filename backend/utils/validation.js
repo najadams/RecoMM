@@ -24,12 +24,10 @@ const validateRegister = (data) => {
     password: Joi.string()
       .min(6)
       .max(128)
-      .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)'))
       .required()
       .messages({
         'string.min': 'Password must be at least 6 characters long',
         'string.max': 'Password cannot exceed 128 characters',
-        'string.pattern.base': 'Password must contain at least one lowercase letter, one uppercase letter, and one number',
         'any.required': 'Password is required'
       }),
     confirmPassword: Joi.string()
@@ -108,12 +106,10 @@ const validatePasswordChange = (data) => {
     newPassword: Joi.string()
       .min(6)
       .max(128)
-      .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)'))
       .required()
       .messages({
         'string.min': 'New password must be at least 6 characters long',
         'string.max': 'New password cannot exceed 128 characters',
-        'string.pattern.base': 'New password must contain at least one lowercase letter, one uppercase letter, and one number',
         'any.required': 'New password is required'
       }),
     confirmNewPassword: Joi.string()
