@@ -7,6 +7,7 @@ import BookDetails from './BookDetails';
 import apiService from '../services/api';
 import './Dashboard.css';
 import avater from '../assets/avatar.jpg';
+import auto from '../assets/auto.png'
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -272,7 +273,10 @@ const Dashboard = () => {
               <section className="suggestions-section">
                 <div className="section-header">
                   <h2>Suggestions</h2>
-                  <button className="auto-btn" onClick={loadInitialData} disabled={loading}>🔄 AUTO</button>
+                  <button className="auto-btn" onClick={loadInitialData} disabled={loading}>
+                    <img src={auto} alt="" style={{ height: '15px', marginRight: '5px'}} />
+                    Auto
+                  </button>
                 </div>
                 {loading ? (
                   <div className="loading-state">

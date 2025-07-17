@@ -545,6 +545,21 @@
   transition: width 0.3s ease;
 }
 
+/* Color-coded rating bars */
+.rating-bar-row:nth-child(1) .rating-fill,
+.rating-bar-row:nth-child(2) .rating-fill {
+  background: #28a745; /* Green for 5 and 4 stars */
+}
+
+.rating-bar-row:nth-child(3) .rating-fill {
+  background: #ffc107; /* Orange for 3 stars */
+}
+
+.rating-bar-row:nth-child(4) .rating-fill,
+.rating-bar-row:nth-child(5) .rating-fill {
+  background: #dc3545; /* Red for 2 and 1 stars */
+}
+
 .user-review-section {
   margin-bottom: 2rem;
   padding-bottom: 2rem;
