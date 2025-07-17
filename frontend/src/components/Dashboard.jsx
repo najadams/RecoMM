@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import MyBooks from './MyBooks';
 import Feedback from './Feedback';
 import ContactUs from './ContactUs';
+import BookDetails from './BookDetails';
 import apiService from '../services/api';
 import './Dashboard.css';
 import avater from '../assets/avatar.jpg';
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentView, setCurrentView] = useState('home');
+  const [selectedBook, setSelectedBook] = useState(null);
   const [bookSuggestions, setBookSuggestions] = useState([]);
   const [trendingBooks, setTrendingBooks] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -94,6 +96,23 @@ const Dashboard = () => {
     
     return stars.join('');
   };
+
+  const handleNavigation = (view, book = null) => {
+    setCurrentView(view);
+    if (book) {
+      setSelectedBook(book);
+    }
+  };
+
+  const handleBookClick = (book) => {
+    setSelectedBook(book);
+    setCurrentView('book-details');
+  };
+
+  // If user is viewing Book Details, render the BookDetails component
+  if (currentView === 'book-details' && selectedBook) {
+    return <BookDetails book={selectedBook} onNavigate={handleNavigation} />;
+  }
 
   // If user is viewing My Books, render the MyBooks component
   if (currentView === 'mybooks') {
@@ -219,7 +238,7 @@ const Dashboard = () => {
                 {searchResults.length > 0 ? (
                   <div className="books-grid">
                     {searchResults.map((book) => (
-                      <div key={book.id} className="book-card">
+                      <div key={book.id} className="book-card" onClick={() => handleBookClick(book)}>
                         <div className="book-cover">
                           <img src={book.thumbnail} alt={book.title} onError={(e) => {
                             e.target.src = '/api/placeholder/120/180';
@@ -262,7 +281,7 @@ const Dashboard = () => {
                 ) : (
                   <div className="books-grid">
                     {bookSuggestions.map((book) => (
-                      <div key={book.id} className="book-card">
+                      <div key={book.id} className="book-card" onClick={() => handleBookClick(book)}>
                         <div className="book-cover">
                           <img src={book.thumbnail} alt={book.title} onError={(e) => {
                             e.target.src = '/api/placeholder/120/180';
@@ -295,7 +314,7 @@ const Dashboard = () => {
                 ) : (
                   <div className="trending-grid">
                     {trendingBooks.map((book) => (
-                      <div key={book.id} className="trending-book">
+                      <div key={book.id} className="trending-book" onClick={() => handleBookClick(book)}>
                         <div className="book-cover">
                           <img src={book.thumbnail} alt={book.title} onError={(e) => {
                             e.target.src = '/api/placeholder/120/180';
