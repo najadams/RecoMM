@@ -8,7 +8,7 @@ import BookDetails from './BookDetails';
 import Profile from './Profile';
 import Footer from './Footer';
 
-import apiService, { getSmartRecommendations, getPersonalizedRecommendations, getUserPreferences, submitRecommendationFeedback, startReading, completeReading, addToWantToRead, getBookStatus } from '../services/api';
+import apiService, { getSmartRecommendations, getPersonalizedRecommendations, getUserPreferences, submitRecommendationFeedback, startReading, completeReading, addToWantToRead, getBookStatus, getReadingHistory } from '../services/api';
 import './Dashboard.css';
 import auto from '../assets/auto.png'
 
@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [bookStatuses, setBookStatuses] = useState({});
   const [actionLoading, setActionLoading] = useState({});
   const [selectedBookFilter, setSelectedBookFilter] = useState('all');
+  const [userBooks, setUserBooks] = useState([]);
 
   // AI Recommendations Constants
   const moods = [
@@ -76,7 +77,38 @@ const Dashboard = () => {
   // Load initial data when component mounts
   useEffect(() => {
     loadInitialData();
+    loadUserBooks();
   }, []);
+
+  // Map status for filtering (same as MyBooks)
+  const mapStatus = (status) => {
+    const statusMap = {
+      'want-to-read': 'saved',
+      'reading': 'reading',
+      'read': 'completed',
+      'completed': 'completed',
+      'did-not-finish': 'dnf'
+    };
+    return statusMap[status] || status;
+  };
+
+  // Get count of books by status (same as MyBooks)
+  const getStatusCount = (status) => {
+    if (status === 'all') return userBooks.length;
+    return userBooks.filter(book => mapStatus(book.status) === status).length;
+  };
+
+  // Load user's reading history for bookshelf counts
+  const loadUserBooks = async () => {
+    try {
+      const historyResponse = await getReadingHistory();
+      if (historyResponse.success) {
+        setUserBooks(historyResponse.readingHistory || []);
+      }
+    } catch (error) {
+      console.error('Error fetching user books for shelf counts:', error);
+    }
+  };
 
   const loadInitialData = async () => {
     try {
@@ -265,6 +297,8 @@ const Dashboard = () => {
       // Update book status if it was automatically changed
       if (result.readingStatusUpdated) {
         await fetchBookStatus(bookId);
+      // Refresh user books to update shelf counts
+      await loadUserBooks();
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -298,6 +332,8 @@ const Dashboard = () => {
         genres: bookData.categories || []
       });
       await fetchBookStatus(bookId);
+      // Refresh user books to update shelf counts
+      await loadUserBooks();
     } catch (error) {
       console.error('Error starting reading:', error);
       setAiError('Failed to start reading. Please try again.');
@@ -314,6 +350,8 @@ const Dashboard = () => {
       
       await completeReading(bookId, additionalData);
       await fetchBookStatus(bookId);
+      // Refresh user books to update shelf counts
+      await loadUserBooks();
     } catch (error) {
       console.error('Error completing reading:', error);
       setAiError('Failed to mark as completed. Please try again.');
@@ -331,6 +369,8 @@ const Dashboard = () => {
         genres: bookData.categories || []
       });
       await fetchBookStatus(bookId);
+      // Refresh user books to update shelf counts
+      await loadUserBooks();
     } catch (error) {
       console.error('Error adding to want-to-read:', error);
       setAiError('Failed to add to want-to-read list. Please try again.');
@@ -424,19 +464,19 @@ const Dashboard = () => {
               <div className="shelf-items">
                 <div className="shelf-item" onClick={() => handleShelfItemClick('all')}>
                   <span>ALL</span>
-                  <span className="count">(0)</span>
+                  <span className="count">({getStatusCount('all')})</span>
                 </div>
                 <div className="shelf-item" onClick={() => handleShelfItemClick('completed')}>
                   <span>COMPLETED</span>
-                  <span className="count">(0)</span>
+                  <span className="count">({getStatusCount('completed')})</span>
                 </div>
                 <div className="shelf-item" onClick={() => handleShelfItemClick('reading')}>
                   <span>READING</span>
-                  <span className="count">(0)</span>
+                  <span className="count">({getStatusCount('reading')})</span>
                 </div>
                 <div className="shelf-item" onClick={() => handleShelfItemClick('saved')}>
                   <span>SAVED</span>
-                  <span className="count">(0)</span>
+                  <span className="count">({getStatusCount('saved')})</span>
                 </div>
               </div>
               
