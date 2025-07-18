@@ -3,6 +3,7 @@ import './ContactUs.css';
 import Contact from '../assets/customerSupport.png';
 import avatar from '../assets/avatar.jpg';
 import Phone from '../assets/ContactUS.png'
+import Footer from './Footer';
 
 const ContactUs = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
@@ -216,6 +217,7 @@ const ContactUs = ({ onNavigate }) => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

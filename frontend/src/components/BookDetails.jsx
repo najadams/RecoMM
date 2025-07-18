@@ -12,6 +12,8 @@ const BookDetails = ({ book, onNavigate }) => {
   const [userReview, setUserReview] = useState('');
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [bookStatus, setBookStatus] = useState('want-to-read');
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -23,7 +25,24 @@ const BookDetails = ({ book, onNavigate }) => {
 
   useEffect(() => {
     loadRecommendations();
+    loadUserBookStatus();
   }, [book]);
+
+  const loadUserBookStatus = async () => {
+    try {
+      // Check if user has this book in their reading history
+      const response = await apiService.getReadingHistory();
+      const userBook = response.readingHistory?.find(b => b.bookId === book.id);
+      
+      if (userBook) {
+        setBookStatus(userBook.status);
+        setReadingProgress(userBook.progress || 0);
+        setUserRating(userBook.rating || 0);
+      }
+    } catch (error) {
+      console.error('Error loading user book status:', error);
+    }
+  };
 
   const loadRecommendations = async () => {
     try {
@@ -56,12 +75,59 @@ const BookDetails = ({ book, onNavigate }) => {
     return stars;
   };
 
-  const handleRatingSubmit = () => {
-    // In a real app, this would submit to your backend
-    console.log('Rating submitted:', userRating, userReview);
-    setShowReviewForm(false);
-    setUserReview('');
-    setUserRating(0);
+  const handleRatingSubmit = async () => {
+    try {
+      await apiService.updateBookStatus(book.id, bookStatus, {
+        title: book.title,
+        authors: book.authors,
+        genres: book.categories,
+        rating: userRating,
+        review: userReview,
+        progress: readingProgress
+      });
+      
+      setShowReviewForm(false);
+      setUserReview('');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    if (isUpdatingStatus) return;
+    
+    try {
+      setIsUpdatingStatus(true);
+      
+      await apiService.updateBookStatus(book.id, newStatus, {
+        title: book.title,
+        authors: book.authors,
+        genres: book.categories,
+        rating: userRating,
+        progress: newStatus === 'reading' ? readingProgress : 0
+      });
+      
+      setBookStatus(newStatus);
+      
+      // Reset progress if changing from reading to want-to-read
+      if (newStatus === 'want-to-read') {
+        setReadingProgress(0);
+      }
+    } catch (error) {
+      console.error('Error updating book status:', error);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleProgressChange = async (newProgress) => {
+    setReadingProgress(newProgress);
+    
+    try {
+      await apiService.updateReadingProgress(book.id, newProgress);
+    } catch (error) {
+      console.error('Error updating reading progress:', error);
+    }
   };
 
   const mockReviews = [
@@ -155,9 +221,47 @@ const BookDetails = ({ book, onNavigate }) => {
 
               <div className="book-actions">
                 <div className="action-buttons">
-                  <button className="btn-primary">Currently Reading</button>
-                  <button className="btn-secondary">Want to Read</button>
+                  {bookStatus === 'reading' ? (
+                    <button 
+                      className="btn-primary"
+                      onClick={() => handleStatusChange('want-to-read')}
+                      disabled={isUpdatingStatus}
+                    >
+                      {isUpdatingStatus ? 'Updating...' : 'Currently Reading'}
+                    </button>
+                  ) : (
+                    <button 
+                      className="btn-secondary"
+                      onClick={() => handleStatusChange('reading')}
+                      disabled={isUpdatingStatus}
+                    >
+                      {isUpdatingStatus ? 'Updating...' : 'Want to Read'}
+                    </button>
+                  )}
                 </div>
+                
+                {bookStatus === 'reading' && (
+                  <div className="reading-progress">
+                    <div className="progress-header">
+                      <span>Reading Progress</span>
+                      <span>{Math.round(readingProgress)}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{width: `${readingProgress}%`}}
+                      ></div>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={readingProgress}
+                      onChange={(e) => handleProgressChange(parseInt(e.target.value))}
+                      className="progress-slider"
+                    />
+                  </div>
+                )}
                 
                 <div className="user-rating">
                   <span>Rate this book</span>

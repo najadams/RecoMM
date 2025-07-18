@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './Feedback.css';
 import Find from '../assets/find.png';
 import Avater from '../assets/avatar.jpg';
+import Footer from './Footer';
 
 const Feedback = ({ onNavigate }) => {
   const { user, logout } = useAuth();
@@ -170,6 +171,7 @@ const Feedback = ({ onNavigate }) => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

@@ -178,22 +178,239 @@ class ApiService {
     const randomQuery = suggestionQueries[Math.floor(Math.random() * suggestionQueries.length)];
     return await this.searchBooks(randomQuery, 6);
   }
+
+  // AI-Powered Recommendation methods
+  async getPersonalizedRecommendations(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.mood) queryParams.append('mood', params.mood);
+    if (params.genres) queryParams.append('genres', Array.isArray(params.genres) ? params.genres.join(',') : params.genres);
+    if (params.excludeGenres) queryParams.append('excludeGenres', Array.isArray(params.excludeGenres) ? params.excludeGenres.join(',') : params.excludeGenres);
+    
+    const endpoint = `/recommendations${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return await this.request(endpoint);
+  }
+
+  async getSmartRecommendations(naturalLanguageInput, limit = 10) {
+    return await this.request('/recommendations/smart', {
+      method: 'POST',
+      body: {
+        naturalLanguageInput,
+        limit
+      }
+    });
+  }
+
+  async getTrendingRecommendations(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.genre) queryParams.append('genre', params.genre);
+    if (params.timeframe) queryParams.append('timeframe', params.timeframe);
+    
+    const endpoint = `/recommendations/trending${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return await this.request(endpoint);
+  }
+
+  // User Preferences methods
+  async getUserPreferences() {
+    return await this.request('/recommendations/preferences');
+  }
+
+  async updateUserPreferences(preferences, naturalLanguageInput = null) {
+    const body = { preferences };
+    if (naturalLanguageInput) {
+      body.naturalLanguageInput = naturalLanguageInput;
+    }
+    
+    return await this.request('/recommendations/preferences', {
+      method: 'PUT',
+      body
+    });
+  }
+
+  // Reading History methods
+  async addToReadingHistory(bookData) {
+    return await this.request('/recommendations/reading-history', {
+      method: 'POST',
+      body: bookData
+    });
+  }
+
+  async updateBookStatus(bookId, status, additionalData = {}) {
+    return await this.request(`/recommendations/reading-history/${bookId}`, {
+      method: 'PUT',
+      body: {
+        status,
+        ...additionalData
+      }
+    });
+  }
+
+  async getReadingHistory(page = 1, limit = 20) {
+    return await this.request(`/recommendations/history?page=${page}&limit=${limit}`);
+  }
+
+  // Recommendation Feedback methods
+  async submitRecommendationFeedback(bookId, feedback, bookData = {}) {
+    return await this.request('/recommendations/feedback', {
+      method: 'POST',
+      body: {
+        bookId,
+        feedback,
+        bookData
+      }
+    });
+  }
+
+  // Start reading a book (automatically updates status to 'reading')
+  async startReading(bookId, bookData) {
+    return await this.request(`/recommendations/start-reading/${bookId}`, {
+      method: 'POST',
+      body: { bookData }
+    });
+  }
+
+  // Complete reading a book (automatically updates status to 'read')
+  async completeReading(bookId, additionalData = {}) {
+    return await this.request(`/recommendations/complete-reading/${bookId}`, {
+      method: 'POST',
+      body: additionalData
+    });
+  }
+
+  // Add book to want-to-read list
+  async addToWantToRead(bookId, bookData) {
+    return await this.request(`/recommendations/want-to-read/${bookId}`, {
+      method: 'POST',
+      body: { bookData }
+    });
+  }
+
+  // Update reading progress for a book
+  async updateReadingProgress(bookId, progress, timeSpent = 0) {
+    return await this.request(`/recommendations/reading-progress/${bookId}`, {
+      method: 'PUT',
+      body: { progress, timeSpent }
+    });
+  }
+
+  // Get book status for current user
+  async getBookStatus(bookId) {
+    return await this.request(`/recommendations/book-status/${bookId}`);
+  }
+
+  // Enhanced book search with AI context
+  async searchBooksWithContext(query, userContext = {}, maxResults = 12) {
+    try {
+      // First try to get AI-enhanced recommendations if user has context
+      if (userContext.hasPreferences) {
+        const aiRecommendations = await this.getSmartRecommendations(
+          `Find books similar to: ${query}`,
+          Math.min(maxResults, 10)
+        );
+        
+        if (aiRecommendations.success && aiRecommendations.recommendations.length > 0) {
+          return aiRecommendations.recommendations;
+        }
+      }
+    } catch (error) {
+      console.warn('AI-enhanced search failed, falling back to regular search:', error);
+    }
+    
+    // Fallback to regular Google Books search
+    return await this.searchBooks(query, maxResults);
+  }
+
+  // Utility method to check if AI recommendations are available
+  async checkAIAvailability() {
+    try {
+      const response = await this.request('/recommendations/trending?limit=1');
+      return response.success;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // Get reading statistics
+  async getReadingStats() {
+    try {
+      const preferences = await this.getUserPreferences();
+      return preferences.readingStats || {};
+    } catch (error) {
+      console.error('Failed to get reading stats:', error);
+      return {};
+    }
+  }
+
+  // Batch operations for better performance
+  async batchUpdateReadingHistory(updates) {
+    const promises = updates.map(update => 
+      this.updateBookStatus(update.bookId, update.status, update.additionalData)
+    );
+    
+    try {
+      const results = await Promise.allSettled(promises);
+      return {
+        successful: results.filter(r => r.status === 'fulfilled').length,
+        failed: results.filter(r => r.status === 'rejected').length,
+        results
+      };
+    } catch (error) {
+      console.error('Batch update failed:', error);
+      throw error;
+    }
+  }
+
+  async batchSubmitFeedback(feedbackList) {
+    const promises = feedbackList.map(feedback => 
+      this.submitRecommendationFeedback(feedback.bookId, feedback.feedback, feedback.bookData)
+    );
+    
+    try {
+      const results = await Promise.allSettled(promises);
+      return {
+        successful: results.filter(r => r.status === 'fulfilled').length,
+        failed: results.filter(r => r.status === 'rejected').length,
+        results
+      };
+    } catch (error) {
+      console.error('Batch feedback submission failed:', error);
+      throw error;
+    }
+  }
 }
 
 // Create and export a singleton instance
 const apiService = new ApiService();
 export default apiService;
 
-// Export individual methods for convenience
-export const {
-  register,
-  login,
-  logout,
-  getCurrentUser,
-  updateProfile,
-  changePassword,
-  isAuthenticated,
-  searchBooks,
-  getTrendingBooks,
-  getBookSuggestions,
-} = apiService;
+// Export individual methods for convenience with proper binding
+export const register = (...args) => apiService.register(...args);
+export const login = (...args) => apiService.login(...args);
+export const logout = (...args) => apiService.logout(...args);
+export const getCurrentUser = (...args) => apiService.getCurrentUser(...args);
+export const updateProfile = (...args) => apiService.updateProfile(...args);
+export const changePassword = (...args) => apiService.changePassword(...args);
+export const isAuthenticated = (...args) => apiService.isAuthenticated(...args);
+export const searchBooks = (...args) => apiService.searchBooks(...args);
+export const getTrendingBooks = (...args) => apiService.getTrendingBooks(...args);
+export const getBookSuggestions = (...args) => apiService.getBookSuggestions(...args);
+export const getPersonalizedRecommendations = (...args) => apiService.getPersonalizedRecommendations(...args);
+export const getSmartRecommendations = (...args) => apiService.getSmartRecommendations(...args);
+export const getTrendingRecommendations = (...args) => apiService.getTrendingRecommendations(...args);
+export const getUserPreferences = (...args) => apiService.getUserPreferences(...args);
+export const updateUserPreferences = (...args) => apiService.updateUserPreferences(...args);
+export const addToReadingHistory = (...args) => apiService.addToReadingHistory(...args);
+export const updateBookStatus = (...args) => apiService.updateBookStatus(...args);
+export const getReadingHistory = (...args) => apiService.getReadingHistory(...args);
+export const submitRecommendationFeedback = (...args) => apiService.submitRecommendationFeedback(...args);
+export const startReading = (...args) => apiService.startReading(...args);
+export const completeReading = (...args) => apiService.completeReading(...args);
+export const addToWantToRead = (...args) => apiService.addToWantToRead(...args);
+export const updateReadingProgress = (...args) => apiService.updateReadingProgress(...args);
+export const getBookStatus = (...args) => apiService.getBookStatus(...args);
+export const searchBooksWithContext = (...args) => apiService.searchBooksWithContext(...args);
+export const checkAIAvailability = (...args) => apiService.checkAIAvailability(...args);
+export const getReadingStats = (...args) => apiService.getReadingStats(...args);
+export const batchUpdateReadingHistory = (...args) => apiService.batchUpdateReadingHistory(...args);
+export const batchSubmitFeedback = (...args) => apiService.batchSubmitFeedback(...args);
