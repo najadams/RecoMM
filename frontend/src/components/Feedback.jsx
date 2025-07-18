@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Header from './Header';
 import './Feedback.css';
 import Find from '../assets/find.png';
-import Avater from '../assets/avatar.jpg';
 import Footer from './Footer';
 
 const Feedback = ({ onNavigate }) => {
@@ -60,54 +60,7 @@ const Feedback = ({ onNavigate }) => {
   return (
     <div className="feedback-page">
       {/* Header */}
-      <header className="library-header">
-        <div className="header-left">
-          <div className="logo">
-            <div className="book-club-logo">
-              <span className="book-text">BOOK</span>
-              <span className="club-text">CLUB</span>
-            </div>
-            <span className="logo-name">LOGO NAME</span>
-          </div>
-        </div>
-        <nav className="main-nav">
-          <a
-            href="#"
-            className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate("home");
-            }}>
-            Home
-          </a>
-          <a
-            href="#"
-            className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate("mybooks");
-            }}>
-            My Books
-          </a>
-          <a href="#" className="nav-link active">
-            Feedback
-          </a>
-          <a
-            href="#"
-            className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate("contact");
-            }}>
-            Contact US
-          </a>
-        </nav>
-        <div className="header-right">
-          <div className="user-avatar" onClick={handleLogout} title="Logout">
-            <img src={Avater} alt="User" />
-          </div>
-        </div>
-      </header>
+      <Header currentView="feedback" onNavigate={onNavigate} />
 
       {/* Main Content */}
       <main className="feedback-main">

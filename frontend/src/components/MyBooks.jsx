@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getReadingHistory, getReadingStats, updateBookStatus } from '../services/api';
+import Header from './Header';
 import './MyBooks.css';
-import avatar from '../assets/avatar.jpg'
 import Footer from './Footer';
 
 // Enhanced styles for the new features
@@ -320,14 +320,14 @@ const styles = `
   }
 `;
 
-const MyBooks = ({ onNavigate }) => {
+const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [userBooks, setUserBooks] = useState([]);
   const [readingStats, setReadingStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState(initialFilter);
 
   const handleLogout = async () => {
     try {
@@ -367,12 +367,13 @@ const MyBooks = ({ onNavigate }) => {
     fetchUserBooks();
   }, [user]);
 
-  // Map backend status to frontend display
+  // Map status for filtering
   const mapStatus = (status) => {
     const statusMap = {
       'want-to-read': 'saved',
       'reading': 'reading',
-      'read': 'read',
+      'read': 'completed',
+      'completed': 'completed',
       'did-not-finish': 'dnf'
     };
     return statusMap[status] || status;
@@ -441,28 +442,7 @@ const MyBooks = ({ onNavigate }) => {
     <div className="my-books-page">
       <style>{styles}</style>
       {/* Header */}
-      <header className="library-header">
-        <div className="header-left">
-          <div className="logo">
-            <div className="book-club-logo">
-              <span className="book-text">BOOK</span>
-              <span className="club-text">CLUB</span>
-            </div>
-            <span className="logo-name">LOGO NAME</span>
-          </div>
-        </div>
-        <nav className="main-nav">
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('home'); }}>Home</a>
-          <a href="#" className="nav-link active" >My Books</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('feedback'); }}>Feedback</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('contactus'); }}>Contact US</a>
-        </nav>
-        <div className="header-right">
-          <div className="user-avatar" onClick={handleLogout} title="Logout">
-            <img src={avatar} alt="User" />
-          </div>
-        </div>
-      </header>
+      <Header currentView="mybooks" onNavigate={onNavigate} />
 
       {/* Main Content */}
       <main className="my-books-main">
@@ -501,11 +481,11 @@ const MyBooks = ({ onNavigate }) => {
                   <span className="count">({getStatusCount('all')})</span>
                 </div>
                 <div 
-                  className={`shelf-item ${selectedFilter === 'read' ? 'active' : ''}`}
-                  onClick={() => setSelectedFilter('read')}
+                  className={`shelf-item ${selectedFilter === 'completed' ? 'active' : ''}`}
+                  onClick={() => setSelectedFilter('completed')}
                 >
-                  <span>READ</span>
-                  <span className="count">({getStatusCount('read')})</span>
+                  <span>COMPLETED</span>
+                  <span className="count">({getStatusCount('completed')})</span>
                 </div>
                 <div 
                   className={`shelf-item ${selectedFilter === 'reading' ? 'active' : ''}`}

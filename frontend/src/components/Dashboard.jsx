@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Header from './Header';
 import MyBooks from './MyBooks';
 import Feedback from './Feedback';
 import ContactUs from './ContactUs';
@@ -9,7 +10,6 @@ import Footer from './Footer';
 
 import apiService, { getSmartRecommendations, getPersonalizedRecommendations, getUserPreferences, submitRecommendationFeedback, startReading, completeReading, addToWantToRead, getBookStatus } from '../services/api';
 import './Dashboard.css';
-import avater from '../assets/avatar.jpg';
 import auto from '../assets/auto.png'
 
 const Dashboard = () => {
@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [showPersonalized, setShowPersonalized] = useState(false);
   const [bookStatuses, setBookStatuses] = useState({});
   const [actionLoading, setActionLoading] = useState({});
+  const [selectedBookFilter, setSelectedBookFilter] = useState('all');
 
   // AI Recommendations Constants
   const moods = [
@@ -141,11 +142,19 @@ const Dashboard = () => {
     return stars.join('');
   };
 
-  const handleNavigation = (view, book = null) => {
+  const handleNavigation = (view, book = null, filter = null) => {
     setCurrentView(view);
     if (book) {
       setSelectedBook(book);
     }
+    if (filter) {
+      setSelectedBookFilter(filter);
+    }
+  };
+
+  const handleShelfItemClick = (filter) => {
+    setSelectedBookFilter(filter);
+    setCurrentView('mybooks');
   };
 
   const handleBookClick = (book) => {
@@ -358,7 +367,7 @@ const Dashboard = () => {
 
   // If user is viewing My Books, render the MyBooks component
   if (currentView === 'mybooks') {
-    return <MyBooks onNavigate={setCurrentView} />;
+    return <MyBooks onNavigate={setCurrentView} initialFilter={selectedBookFilter} />;
   }
 
   // If user is viewing Feedback, render the Feedback component
@@ -381,28 +390,7 @@ const Dashboard = () => {
   return (
     <div className="library-dashboard">
       {/* Header */}
-      <header className="library-header">
-        <div className="header-left">
-          <div className="logo">
-            <div className="book-club-logo">
-              <span className="book-text">BOOK</span>
-              <span className="club-text">CLUB</span>
-            </div>
-            <span className="logo-name">LOGO NAME</span>
-          </div>
-        </div>
-        <nav className="main-nav">
-           <a href="#" className={`nav-link ${currentView === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('home'); }}>Home</a>
-           <a href="#" className={`nav-link ${currentView === 'mybooks' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('mybooks'); }}>My Books</a>
-           <a href="#" className={`nav-link ${currentView === 'feedback' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('feedback'); }}>Feedback</a>
-           <a href="#" className={`nav-link ${currentView === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentView('contact'); }}>Contact US</a>
-         </nav>
-        <div className="header-right">
-          <div className="user-avatar" onClick={() => setCurrentView('profile')} title="Profile">
-            <img src={avater} alt="User" />
-          </div>
-        </div>
-      </header>
+      <Header currentView={currentView} onNavigate={setCurrentView} />
 
       {/* Main Content */}
       <main className="library-main">
@@ -434,19 +422,19 @@ const Dashboard = () => {
             <div className="book-shelf">
               <h3 className="shelf-title">BOOK SHELF</h3>
               <div className="shelf-items">
-                <div className="shelf-item">
+                <div className="shelf-item" onClick={() => handleShelfItemClick('all')}>
                   <span>ALL</span>
                   <span className="count">(0)</span>
                 </div>
-                <div className="shelf-item">
-                  <span>READ</span>
+                <div className="shelf-item" onClick={() => handleShelfItemClick('completed')}>
+                  <span>COMPLETED</span>
                   <span className="count">(0)</span>
                 </div>
-                <div className="shelf-item">
+                <div className="shelf-item" onClick={() => handleShelfItemClick('reading')}>
                   <span>READING</span>
                   <span className="count">(0)</span>
                 </div>
-                <div className="shelf-item">
+                <div className="shelf-item" onClick={() => handleShelfItemClick('saved')}>
                   <span>SAVED</span>
                   <span className="count">(0)</span>
                 </div>
@@ -639,7 +627,7 @@ const Dashboard = () => {
         <div className="ai-modal-overlay" onClick={() => setShowAIModal(false)}>
           <div className="ai-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="ai-modal-header">
-              <h2>🤖 AI-Powered Book Recommendations</h2>
+              <h2>AI-Powered Book Recommendations</h2>
               <button className="close-modal" onClick={() => setShowAIModal(false)}>×</button>
             </div>
             

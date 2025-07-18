@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import apiService from '../services/api';
+import Header from './Header';
 import './BookDetails.css';
 import avatar from '../assets/avatar.jpg';
 
@@ -169,28 +170,7 @@ const BookDetails = ({ book, onNavigate }) => {
   return (
     <div className="book-details-page">
       {/* Header */}
-      <header className="library-header">
-        <div className="header-left">
-          <div className="logo">
-            <div className="book-club-logo">
-              <span className="book-text">BOOK</span>
-              <span className="club-text">CLUB</span>
-            </div>
-            <span className="logo-name">LOGO NAME</span>
-          </div>
-        </div>
-        <nav className="main-nav">
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('home'); }}>Home</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('mybooks'); }}>My Books</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('feedback'); }}>Feedback</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Contact US</a>
-        </nav>
-        <div className="header-right">
-          <div className="user-avatar" onClick={handleLogout} title="Logout">
-            <img src={avatar} alt="User" />
-          </div>
-        </div>
-      </header>
+      <Header currentView="bookdetails" onNavigate={onNavigate} />
 
       {/* Main Content */}
       <main className="book-details-main">

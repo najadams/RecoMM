@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import Header from './Header';
 import './ContactUs.css';
 import Contact from '../assets/customerSupport.png';
-import avatar from '../assets/avatar.jpg';
 import Phone from '../assets/ContactUS.png'
 import Footer from './Footer';
 
@@ -40,55 +40,7 @@ const ContactUs = ({ onNavigate }) => {
   return (
     <div className="contact-page">
       {/* Header */}
-      <header className="library-header">
-        <div className="header-left">
-          <div className="logo">
-            <div className="book-club-logo">
-              <span className="book-text">BOOK</span>
-              <span className="club-text">CLUB</span>
-            </div>
-            <span className="logo-name">LOGO NAME</span>
-          </div>
-        </div>
-        <nav className="main-nav">
-          <a 
-             href="#" 
-             className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate('home');
-            }}
-          >
-            Home
-          </a>
-          <a 
-             href="#" 
-            className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate('mybooks');
-            }}
-          >
-            My Books
-          </a>
-          <a  
-            href="#" 
-            className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate('feedback');
-            }}
-          >
-            Feedback
-          </a>
-          <a href="#" className="nav-link active">Contact US</a>
-        </nav>
-        <div className="header-right">
-          <div className="user-avatar">
-            <img src={avatar} alt="User Avatar" />
-          </div>
-        </div>
-      </header>
+      <Header currentView="contactus" onNavigate={onNavigate} />
 
       {/* Main Content */}
       <main className="contact-main">

@@ -239,7 +239,7 @@ const SmartRecommendations = () => {
   return (
     <div className="smart-recommendations">
       <div className="smart-recommendations-header">
-        <h2>🤖 AI-Powered Book Recommendations</h2>
+        <h2> AI-Powered Book Recommendations</h2>
         <p>Describe what you're looking for, and our AI will find the perfect books for you!</p>
       </div>
 
