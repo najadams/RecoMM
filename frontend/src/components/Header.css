@@ -10,10 +10,36 @@
 
 /* Sticky Header */
 .sticky-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Header Visibility States */
+.header-visible {
+  transform: translateY(0);
+}
+
+.header-hidden {
+  transform: translateY(-100%);
+}
+
+/* Body padding to account for fixed header */
+body {
+  padding-top: 80px; /* Adjust based on header height */
+}
+
+/* Alternative: Add padding to main content containers */
+.dashboard-page,
+.my-books-page,
+.feedback-page,
+.contact-page,
+.book-details-page {
+  padding-top: 80px;
 }
 
 .header-left {
