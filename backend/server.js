@@ -18,9 +18,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const recommendationRoutes = require('./routes/recommendations');
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 // Test route
 app.get('/test', (req, res) => {
