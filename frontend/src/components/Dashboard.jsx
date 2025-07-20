@@ -407,7 +407,7 @@ const Dashboard = () => {
 
   // If user is viewing My Books, render the MyBooks component
   if (currentView === 'mybooks') {
-    return <MyBooks onNavigate={setCurrentView} initialFilter={selectedBookFilter} />;
+    return <MyBooks onNavigate={handleNavigation} initialFilter={selectedBookFilter} />;
   }
 
   // If user is viewing Feedback, render the Feedback component
