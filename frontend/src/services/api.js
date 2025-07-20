@@ -179,6 +179,54 @@ class ApiService {
     return await this.searchBooks(randomQuery, 6);
   }
 
+  // Get book details by ID from Google Books API
+  async getBookDetails(bookId) {
+    const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
+    const url = `${GOOGLE_BOOKS_API}/${bookId}`;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch book details from Google Books API');
+      }
+      const item = await response.json();
+      
+      return {
+        id: item.id,
+        title: item.volumeInfo.title || 'Unknown Title',
+        authors: item.volumeInfo.authors || ['Unknown Author'],
+        description: item.volumeInfo.description || 'No description available',
+        thumbnail: item.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || '/api/placeholder/120/180',
+        rating: item.volumeInfo.averageRating || 0,
+        ratingsCount: item.volumeInfo.ratingsCount || 0,
+        publishedDate: item.volumeInfo.publishedDate || 'Unknown',
+        pageCount: item.volumeInfo.pageCount || 0,
+        categories: item.volumeInfo.categories || [],
+        language: item.volumeInfo.language || 'en',
+        previewLink: item.volumeInfo.previewLink || '',
+        infoLink: item.volumeInfo.infoLink || ''
+      };
+    } catch (error) {
+      console.error('Google Books API Error for book ID', bookId, ':', error);
+      // Return minimal data if API call fails
+      return {
+        id: bookId,
+        title: 'Unknown Title',
+        authors: ['Unknown Author'],
+        description: 'No description available',
+        thumbnail: '/api/placeholder/120/180',
+        rating: 0,
+        ratingsCount: 0,
+        publishedDate: 'Unknown',
+        pageCount: 0,
+        categories: [],
+        language: 'en',
+        previewLink: '',
+        infoLink: ''
+      };
+    }
+  }
+
   // AI-Powered Recommendation methods
   async getPersonalizedRecommendations(params = {}) {
     const queryParams = new URLSearchParams();
@@ -414,3 +462,4 @@ export const checkAIAvailability = (...args) => apiService.checkAIAvailability(.
 export const getReadingStats = (...args) => apiService.getReadingStats(...args);
 export const batchUpdateReadingHistory = (...args) => apiService.batchUpdateReadingHistory(...args);
 export const batchSubmitFeedback = (...args) => apiService.batchSubmitFeedback(...args);
+export const getBookDetails = (...args) => apiService.getBookDetails(...args);
