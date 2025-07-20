@@ -1,42 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getReadingHistory, getReadingStats, updateBookStatus } from '../services/api';
+import { getReadingHistory, getReadingStats, updateBookStatus, getBookDetails } from '../services/api';
 import Header from './Header';
 import './MyBooks.css';
+import './Dashboard.css'
 import Footer from './Footer';
 
 // Enhanced styles for the new features
 const styles = `
   .user-books-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
-    padding: 20px 0;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
   }
 
   .user-book-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    background: #fff599;
+    width: 150px;
   }
 
   .user-book-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
   }
 
   .book-cover-large {
     position: relative;
-    height: 300px;
+    width: 120px;
+    height: 180px;
+    background: #ddd;
+    border-radius: 8px;
+    margin: 0 auto 0.5rem;
     overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
 
   .book-cover-large img {
+    margin-bottom: 10px;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -101,129 +106,41 @@ const styles = `
   }
 
   .book-details {
-    padding: 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    text-align: center;
+    margin-top: 1rem;
   }
 
   .book-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-    color: #1f2937;
-    line-height: 1.4;
+    margin: 0.5rem 0 0.25rem 0;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    font-weight: bold;
   }
 
   .book-authors {
-    color: #6b7280;
-    margin: 0 0 12px 0;
-    font-size: 0.9rem;
+    margin: 0;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+  }
+
+  .book-rating {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
   }
 
   .star-rating {
     display: flex;
+    justify-content: center;
     gap: 2px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .star {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
   .star.filled {
     color: #fbbf24;
-  }
-
-  .book-meta {
-    margin-bottom: 16px;
-  }
-
-  .book-genres {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-bottom: 8px;
-  }
-
-  .genre-tag {
-    background: #f3f4f6;
-    color: #374151;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  .book-dates {
-    margin-bottom: 8px;
-  }
-
-  .date-info {
-    display: block;
-    font-size: 0.8rem;
-    color: #6b7280;
-    margin-bottom: 2px;
-  }
-
-  .book-review {
-    margin-bottom: 8px;
-  }
-
-  .book-review p {
-    font-size: 0.85rem;
-    color: #4b5563;
-    font-style: italic;
-    margin: 0;
-    line-height: 1.4;
-  }
-
-  .reading-time {
-    font-size: 0.8rem;
-    color: #059669;
-    font-weight: 500;
-  }
-
-  .book-actions {
-    margin-top: auto;
-    display: flex;
-    gap: 8px;
-  }
-
-  .action-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .action-btn.primary {
-    background: #3b82f6;
-    color: white;
-  }
-
-  .action-btn.primary:hover {
-    background: #2563eb;
-  }
-
-  .status-select {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    background: white;
-    cursor: pointer;
-  }
-
-  .status-select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
   .loading-container {
@@ -337,6 +254,62 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
     }
   };
 
+  // Handle book click to navigate to book details
+  const handleBookClick = (book) => {
+    if (onNavigate) {
+      // Format book data to match the expected structure for BookDetails
+      const formattedBook = {
+        id: book.bookId,
+        title: book.title || 'Unknown Title',
+        authors: Array.isArray(book.authors) ? book.authors : [book.authors || 'Unknown Author'],
+        thumbnail: book.thumbnail || book.cover || book.imageLinks?.thumbnail,
+        description: book.description,
+        rating: book.rating,
+        ratingsCount: book.ratingsCount,
+        publishedDate: book.publishedDate,
+        pageCount: book.pageCount,
+        categories: book.categories,
+        language: book.language,
+        status: book.status
+      };
+      onNavigate('book-details', formattedBook);
+    }
+  };
+
+  // Function to enrich book data with external details
+  const enrichBookData = async (book) => {
+    try {
+      // If book already has complete data, return as is
+      if (book.title && book.title !== 'Unknown Title' && book.authors && book.authors.length > 0 && book.thumbnail) {
+        return book;
+      }
+      
+      // Fetch external book details using the bookId
+      const externalDetails = await getBookDetails(book.bookId);
+      
+      // Merge external details with existing book data, prioritizing external data for missing fields
+      return {
+        ...book,
+        title: book.title && book.title !== 'Unknown Title' ? book.title : externalDetails.title,
+        authors: book.authors && book.authors.length > 0 ? book.authors : externalDetails.authors,
+        thumbnail: book.thumbnail || externalDetails.thumbnail,
+        description: book.description || externalDetails.description,
+        rating: book.rating || externalDetails.rating,
+        ratingsCount: book.ratingsCount || externalDetails.ratingsCount,
+        publishedDate: book.publishedDate || externalDetails.publishedDate,
+        pageCount: book.pageCount || externalDetails.pageCount,
+        categories: book.categories && book.categories.length > 0 ? book.categories : externalDetails.categories,
+        language: book.language || externalDetails.language,
+        previewLink: book.previewLink || externalDetails.previewLink,
+        infoLink: book.infoLink || externalDetails.infoLink
+      };
+    } catch (error) {
+      console.error('Error enriching book data for book ID:', book.bookId, error);
+      // Return original book data if enrichment fails
+      return book;
+    }
+  };
+
   // Fetch user's reading history and stats
   useEffect(() => {
     const fetchUserBooks = async () => {
@@ -349,8 +322,19 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
           getReadingStats()
         ]);
         
+        console.log('Reading history response:', historyResponse);
+        
         if (historyResponse.success) {
-          setUserBooks(historyResponse.readingHistory || []);
+          const rawBooks = historyResponse.readingHistory || [];
+          console.log('Raw user books:', rawBooks);
+          
+          // Enrich book data with external details
+          const enrichedBooks = await Promise.all(
+            rawBooks.map(book => enrichBookData(book))
+          );
+          
+          console.log('Enriched user books:', enrichedBooks);
+          setUserBooks(enrichedBooks);
         }
         
         if (statsResponse.success) {
@@ -406,10 +390,14 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
     try {
       const response = await updateBookStatus(bookId, newStatus);
       if (response.success) {
-        // Refresh the books list
+        // Refresh the books list with enriched data
         const historyResponse = await getReadingHistory();
         if (historyResponse.success) {
-          setUserBooks(historyResponse.readingHistory || []);
+          const rawBooks = historyResponse.readingHistory || [];
+          const enrichedBooks = await Promise.all(
+            rawBooks.map(book => enrichBookData(book))
+          );
+          setUserBooks(enrichedBooks);
         }
       }
     } catch (error) {
@@ -425,17 +413,19 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
   };
 
   // Render star rating
-  const renderStarRating = (rating) => {
-    if (!rating) return null;
+  const renderStars = (rating) => {
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={`star ${i <= rating ? 'filled' : ''}`}>
-          ⭐
-        </span>
-      );
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('⭐');
     }
-    return <div className="star-rating">{stars}</div>;
+    if (hasHalfStar) {
+      stars.push('⭐');
+    }
+    
+    return stars.join('');
   };
 
   return (
@@ -546,99 +536,43 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
               <div className="books-grid-container">
                 {filteredBooks.length > 0 ? (
                   <div className="user-books-grid">
-                    {filteredBooks.map((book) => (
-                      <div key={book.bookId || book._id} className="user-book-card">
-                        <div className="book-cover-large">
-                          <img 
-                            src={book.thumbnail || book.cover || '/api/placeholder/200/300'} 
-                            alt={book.title}
-                            onError={(e) => {
-                              e.target.src = '/api/placeholder/200/300';
-                            }}
-                          />
-                          <div className={`book-status-badge ${mapStatus(book.status)}`}>
-                            {mapStatus(book.status).toUpperCase()}
-                          </div>
-                          {book.readingProgress > 0 && book.status === 'reading' && (
-                            <div className="reading-progress">
-                              <div className="progress-bar">
-                                <div 
-                                  className="progress-fill" 
-                                  style={{ width: `${book.readingProgress}%` }}
-                                ></div>
-                              </div>
-                              <span className="progress-text">{book.readingProgress}%</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="book-details">
-                          <h4 className="book-title">{book.title}</h4>
-                          <p className="book-authors">
-                            {Array.isArray(book.authors) ? book.authors.join(', ') : book.authors || 'Unknown Author'}
-                          </p>
-                          
-                          {book.rating && renderStarRating(book.rating)}
-                          
-                          <div className="book-meta">
-                            {book.genres && book.genres.length > 0 && (
-                              <div className="book-genres">
-                                {book.genres.slice(0, 2).map((genre, index) => (
-                                  <span key={index} className="genre-tag">{genre}</span>
-                                ))}
-                                {book.genres.length > 2 && (
-                                  <span className="genre-tag">+{book.genres.length - 2}</span>
-                                )}
-                              </div>
-                            )}
-                            
-                            <div className="book-dates">
-                              {book.dateAdded && (
-                                <span className="date-info">
-                                  Added: {formatDate(book.dateAdded)}
-                                </span>
-                              )}
-                              {book.dateStarted && (
-                                <span className="date-info">
-                                  Started: {formatDate(book.dateStarted)}
-                                </span>
-                              )}
-                              {book.dateFinished && (
-                                <span className="date-info">
-                                  Finished: {formatDate(book.dateFinished)}
-                                </span>
-                              )}
-                            </div>
-                            
-                            {book.review && (
-                              <div className="book-review">
-                                <p>"{book.review.substring(0, 100)}{book.review.length > 100 ? '...' : ''}"</p>
-                              </div>
-                            )}
-                            
-                            {book.timeSpentReading > 0 && (
-                              <div className="reading-time">
-                                📖 {Math.round(book.timeSpentReading / 60)}h {book.timeSpentReading % 60}m read
-                              </div>
-                            )}
+                    {filteredBooks.map((book) => {
+                      console.log('Rendering book:', book);
+                      return (
+                        <div 
+                          key={book.bookId || book._id} 
+                          className="user-book-card"
+                          onClick={() => handleBookClick(book)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div className="book-cover-largek">
+                            <img 
+                              src={book.thumbnail || book.cover || book.imageLinks?.thumbnail || 'https://via.placeholder.com/128x192/cccccc/666666?text=No+Cover'} 
+                              alt={book.title || 'Unknown Title'}
+                              className="book-cover"
+                              onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/128x192/cccccc/666666?text=No+Cover';
+                              }}
+                            />
                           </div>
                           
-                          <div className="book-actions">
-                            <button className="action-btn primary">View Details</button>
-                            <select 
-                              className="status-select"
-                              value={book.status}
-                              onChange={(e) => handleStatusUpdate(book.bookId, e.target.value)}
-                            >
-                              <option value="want-to-read">Want to Read</option>
-                              <option value="reading">Reading</option>
-                              <option value="read">Read</option>
-                              <option value="did-not-finish">Did Not Finish</option>
-                            </select>
+                          <div className="book-details">
+                            <h4 className="book-title" title={book.title || 'Unknown Title'}>
+                              {(book.title || 'Unknown Title').length > 30 ? (book.title || 'Unknown Title').substring(0, 30) + '...' : (book.title || 'Unknown Title')}
+                            </h4>
+                            <p className="book-authors" title={Array.isArray(book.authors) ? book.authors.join(', ') : book.authors || 'Unknown Author'}>
+                              {Array.isArray(book.authors) && book.authors.length > 0 ? book.authors.join(', ') : book.authors || 'Unknown Author'}
+                            </p>
+                            
+                            {book.rating && book.rating > 0 && (
+                               <div className="book-rating">
+                                 {renderStars(book.rating)} ({book.rating})
+                               </div>
+                             )}
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="empty-state">
