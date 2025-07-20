@@ -9,13 +9,13 @@ const AuthContainer = () => {
   const switchToLogin = () => setIsLogin(true);
 
   return (
-    <div>
+    <>
       {isLogin ? (
         <Login onSwitchToSignup={switchToSignup} />
       ) : (
         <Signup onSwitchToLogin={switchToLogin} />
       )}
-    </div>
+    </>
   );
 };
 

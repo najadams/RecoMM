@@ -11,6 +11,11 @@ const readingHistorySchema = new mongoose.Schema({
   },
   authors: [String],
   genres: [String],
+  thumbnail: String, // Book cover image URL
+  cover: String, // Alternative cover image URL
+  description: String, // Book description
+  publishedDate: String, // Publication date
+  pageCount: Number, // Number of pages
   rating: {
     type: Number,
     min: 1,

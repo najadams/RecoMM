@@ -28,18 +28,14 @@
   transform: translateY(-100%);
 }
 
-/* Body padding to account for fixed header */
-body {
-  padding-top: 80px; /* Adjust based on header height */
-}
 
-/* Alternative: Add padding to main content containers */
+
 .dashboard-page,
 .my-books-page,
 .feedback-page,
 .contact-page,
 .book-details-page {
-  padding-top: 80px;
+  padding-top: 180px;
 }
 
 .header-left {

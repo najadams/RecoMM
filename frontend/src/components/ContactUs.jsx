@@ -47,7 +47,7 @@ const ContactUs = ({ onNavigate }) => {
         <div className="contact-container">
           {/* Contact Header */}
           <div className="contact-header">
-            <h1 className="contact-title">contact us</h1>
+            <h1 className="title">contact us</h1>
           </div>
 
           <div className="contact-content">

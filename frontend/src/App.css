@@ -4,3 +4,16 @@
   margin: 0;
   padding: 0;
 }
+
+
+.title {
+  margin: 0;
+  text-transform: lowercase;
+  font-family: Poppins;
+  font-weight: 700;
+  color: #2c3e50;
+  font-style: Bold;
+  font-size: 48px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}

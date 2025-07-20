@@ -439,10 +439,10 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
         {/* Page Title Section */}
         <section className="page-title-section">
           <div className="page-title-content">
-            <h1 className="page-title">my books</h1>
+            <h1 className="title">my books</h1>
           </div>
           
-          <div className="search-container">
+          <div className="search-containerB">
             <div className="search-wrapper">
               <span className="search-icon">🔍</span>
               <input 
@@ -452,7 +452,6 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input"
               />
-              <button className="filter-btn">⚙️</button>
             </div>
           </div>
         </section>

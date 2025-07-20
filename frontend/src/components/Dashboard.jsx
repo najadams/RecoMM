@@ -66,14 +66,6 @@ const Dashboard = () => {
     "Looking for books about mindfulness and meditation"
   ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
   // Load initial data when component mounts
   useEffect(() => {
     loadInitialData();
@@ -428,7 +420,7 @@ const Dashboard = () => {
 
 
   return (
-    <div className="library-dashboard">
+    <div className="library-dashboard dashboard-page">
       {/* Header */}
       <Header currentView={currentView} onNavigate={setCurrentView} />
 
@@ -437,7 +429,7 @@ const Dashboard = () => {
         {/* Library Section */}
         <section className="library-section">
           <div className="library-header-content">
-            <h1 className="library-title">the library</h1>
+            <h1 className="title">the library</h1>
             <p className="library-subtitle">home for all books</p>
           </div>
           

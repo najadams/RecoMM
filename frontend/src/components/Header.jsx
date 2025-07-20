@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './Header.css';
 import avatar from '../assets/avatar.jpg';
@@ -80,7 +80,7 @@ const Header = ({ currentView, onNavigate }) => {
         </a>
       </nav>
       <div className="header-right">
-        <div className="user-avatar" onClick={handleLogout} title="Logout">
+        <div className="user-avatar" onClick={() => onNavigate('profile')} title="Profile">
           <img src={avatar} alt="User" />
         </div>
       </div>

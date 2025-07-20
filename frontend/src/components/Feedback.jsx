@@ -67,7 +67,7 @@ const Feedback = ({ onNavigate }) => {
         <div className="feedback-container">
           {/* Feedback Header */}
           <div className="feedback-header">
-            <h1 className="feedback-title">feedback</h1>
+            <h1 className="title">feedback</h1>
             <div className="feedback-icon">
               <div>
                 <img src={Find} alt="" className="feedback-illustration" />

@@ -108,17 +108,18 @@
   background: #fff599;
 }
 
-.page-title {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin: 0 0 2rem 0;
-  text-transform: lowercase;
-}
+
 
 .search-container {
-  max-width: 600px;
+  width: 300px;
   margin: 0 auto;
+}
+
+.search-containerB {
+  width: 500px;
+  margin: 0 auto;
+  position: absolute;
+  right: 10px;
 }
 
 .search-wrapper {
