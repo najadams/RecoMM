@@ -12,11 +12,29 @@ class AIRecommendationService {
   }
 
   /**
+   * Check if OpenAI API key is properly configured
+   * @returns {boolean} True if API key is valid
+   */
+  isOpenAIConfigured() {
+    const apiKey = process.env.OPENAI_API_KEY;
+    return apiKey && 
+           apiKey !== 'your-openai-api-key' && 
+           apiKey !== 'your_openai_api_key_here' && 
+           apiKey.length > 10;
+  }
+
+  /**
    * Analyze user's natural language input to extract book preferences
    * @param {string} userInput - Natural language description of book preferences
    * @returns {Object} Structured preferences object
    */
   async analyzeUserPreferences(userInput) {
+    // Check if OpenAI is properly configured
+    if (!this.isOpenAIConfigured()) {
+      console.warn('OpenAI API key not configured. Using fallback NLP analysis.');
+      return this.extractBasicPreferences(userInput);
+    }
+
     try {
       const prompt = `
         Analyze the following user input about book preferences and extract structured information:
@@ -67,14 +85,19 @@ class AIRecommendationService {
     const stemmedTokens = tokens.map(token => this.stemmer.stem(token));
     
     const genreKeywords = {
-      'mystery': ['mystery', 'detective', 'crime', 'thriller', 'suspense'],
-      'romance': ['romance', 'love', 'romantic', 'relationship'],
-      'fantasy': ['fantasy', 'magic', 'wizard', 'dragon', 'medieval'],
-      'science_fiction': ['sci-fi', 'science', 'fiction', 'space', 'future', 'robot'],
-      'horror': ['horror', 'scary', 'ghost', 'vampire', 'zombie'],
-      'biography': ['biography', 'memoir', 'life', 'story', 'autobiography'],
-      'history': ['history', 'historical', 'past', 'war', 'ancient'],
-      'self_help': ['self-help', 'motivation', 'improvement', 'success']
+      'mystery': ['mystery', 'detective', 'crime', 'thriller', 'suspense', 'murder', 'investigation'],
+      'romance': ['romance', 'love', 'romantic', 'relationship', 'dating', 'passion'],
+      'fantasy': ['fantasy', 'magic', 'wizard', 'dragon', 'medieval', 'mythical', 'supernatural'],
+      'science_fiction': ['sci-fi', 'science', 'fiction', 'space', 'future', 'robot', 'alien', 'technology'],
+      'horror': ['horror', 'scary', 'ghost', 'vampire', 'zombie', 'frightening', 'haunted'],
+      'biography': ['biography', 'memoir', 'life', 'story', 'autobiography', 'personal'],
+      'history': ['history', 'historical', 'past', 'war', 'ancient', 'civilization'],
+      'self_help': ['self-help', 'motivation', 'improvement', 'success', 'productivity'],
+      'fiction': ['fiction', 'novel', 'narrative'],
+      'comedy': ['funny', 'humor', 'comedy', 'hilarious', 'amusing'],
+      'adventure': ['adventure', 'journey', 'travel', 'exploration', 'quest'],
+      'drama': ['drama', 'emotional', 'family', 'relationships'],
+      'non_fiction': ['non-fiction', 'factual', 'educational', 'informative']
     };
 
     const detectedGenres = [];
@@ -84,11 +107,71 @@ class AIRecommendationService {
       }
     }
 
+    // Enhanced mood detection
+    let mood = 'neutral';
+    if (tokens.some(token => ['light', 'fun', 'easy', 'cheerful'].includes(token))) {
+      mood = 'light';
+    } else if (tokens.some(token => ['serious', 'deep', 'complex', 'profound'].includes(token))) {
+      mood = 'serious';
+    } else if (tokens.some(token => ['dark', 'intense', 'gritty'].includes(token))) {
+      mood = 'dark';
+    } else if (tokens.some(token => ['uplifting', 'positive', 'inspiring'].includes(token))) {
+      mood = 'uplifting';
+    }
+
+    // Reading level detection
+    let readingLevel = 'intermediate';
+    if (tokens.some(token => ['beginner', 'easy', 'simple'].includes(token))) {
+      readingLevel = 'beginner';
+    } else if (tokens.some(token => ['advanced', 'complex', 'challenging'].includes(token))) {
+      readingLevel = 'advanced';
+    }
+
+    // Book length detection
+    let bookLength = 'medium';
+    if (tokens.some(token => ['short', 'quick', 'brief'].includes(token))) {
+      bookLength = 'short';
+    } else if (tokens.some(token => ['long', 'epic', 'detailed'].includes(token))) {
+      bookLength = 'long';
+    }
+
+    // Publication period detection
+    let publicationPeriod = 'modern';
+    if (tokens.some(token => ['classic', 'old', 'vintage'].includes(token))) {
+      publicationPeriod = 'classic';
+    } else if (tokens.some(token => ['new', 'recent', 'contemporary'].includes(token))) {
+      publicationPeriod = 'contemporary';
+    }
+
+    // Extract potential author names (simple heuristic)
+    const authorPatterns = [
+      /by ([A-Z][a-z]+ [A-Z][a-z]+)/g,
+      /author ([A-Z][a-z]+ [A-Z][a-z]+)/g,
+      /([A-Z][a-z]+ [A-Z][a-z]+) books/g
+    ];
+    
+    const detectedAuthors = [];
+    authorPatterns.forEach(pattern => {
+      const matches = userInput.match(pattern);
+      if (matches) {
+        matches.forEach(match => {
+          const author = match.replace(/^(by |author |books$)/i, '').trim();
+          if (author && !detectedAuthors.includes(author)) {
+            detectedAuthors.push(author);
+          }
+        });
+      }
+    });
+
     return {
-      genres: detectedGenres,
+      genres: detectedGenres.length > 0 ? detectedGenres : ['fiction'],
+      authors: detectedAuthors,
       keywords: tokens.filter(token => token.length > 3),
       themes: [],
-      mood: 'neutral'
+      mood: mood,
+      readingLevel: readingLevel,
+      bookLength: bookLength,
+      publicationPeriod: publicationPeriod
     };
   }
 
@@ -262,6 +345,14 @@ class AIRecommendationService {
    * @returns {Array} Recommendations with AI-generated explanations
    */
   async generateExplanations(recommendations, preferences) {
+    // If OpenAI is not configured, use simple explanations
+    if (!this.isOpenAIConfigured()) {
+      return recommendations.map(book => ({
+        ...book,
+        explanation: book.recommendationReasons.join('. ') || "Recommended based on your preferences."
+      }));
+    }
+
     try {
       const booksWithExplanations = await Promise.all(
         recommendations.map(async (book) => {
@@ -344,6 +435,132 @@ class AIRecommendationService {
       console.error('Error learning from feedback:', error);
       return { success: false, message: 'Failed to record feedback' };
     }
+  }
+
+  /**
+   * Get personalized recommendations based on user request
+   * @param {Object} request - Recommendation request object
+   * @returns {Array} Personalized book recommendations
+   */
+  async getPersonalizedRecommendations(request) {
+    try {
+      const { userPreferences, readingHistory, filters } = request;
+      
+      // For now, use mock data since we don't have a book database
+      const mockBooks = await this.getMockBooks();
+      
+      // Generate recommendations using existing method
+      const recommendations = await this.generateRecommendations(
+        userPreferences,
+        readingHistory,
+        mockBooks
+      );
+      
+      // Apply filters
+      let filteredRecommendations = recommendations;
+      if (filters.limit) {
+        filteredRecommendations = recommendations.slice(0, filters.limit);
+      }
+      
+      return filteredRecommendations;
+    } catch (error) {
+      console.error('Error getting personalized recommendations:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get smart recommendations based on natural language input
+   * @param {Object} request - Smart recommendation request
+   * @returns {Array} Smart book recommendations
+   */
+  async getSmartRecommendations(request) {
+    try {
+      const { naturalLanguageInput, userContext, limit = 10 } = request;
+      
+      // Analyze the natural language input
+      const analyzedPreferences = await this.analyzeUserPreferences(naturalLanguageInput);
+      
+      // Get mock books for recommendations
+      const mockBooks = await this.getMockBooks();
+      
+      // Combine analyzed preferences with user context
+      const combinedPreferences = {
+        ...analyzedPreferences,
+        userHistory: userContext.readingHistory || []
+      };
+      
+      // Generate recommendations
+      const recommendations = await this.generateRecommendations(
+        combinedPreferences,
+        userContext.readingHistory || [],
+        mockBooks
+      );
+      
+      return recommendations.slice(0, limit);
+    } catch (error) {
+      console.error('Error getting smart recommendations:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get mock books for testing (replace with actual book database integration)
+   * @returns {Array} Mock book data
+   */
+  async getMockBooks() {
+    return [
+      {
+        id: '1',
+        title: 'The Seven Husbands of Evelyn Hugo',
+        authors: ['Taylor Jenkins Reid'],
+        categories: ['Fiction', 'Romance', 'Historical Fiction'],
+        description: 'A reclusive Hollywood icon finally tells her story.',
+        rating: 4.5,
+        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
+        publishedDate: '2017'
+      },
+      {
+        id: '2',
+        title: 'Dune',
+        authors: ['Frank Herbert'],
+        categories: ['Science Fiction', 'Fantasy'],
+        description: 'A epic science fiction novel set on the desert planet Arrakis.',
+        rating: 4.3,
+        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
+        publishedDate: '1965'
+      },
+      {
+        id: '3',
+        title: 'The Silent Patient',
+        authors: ['Alex Michaelides'],
+        categories: ['Mystery', 'Thriller', 'Psychological Fiction'],
+        description: 'A psychological thriller about a woman who refuses to speak.',
+        rating: 4.1,
+        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
+        publishedDate: '2019'
+      },
+      {
+        id: '4',
+        title: 'Educated',
+        authors: ['Tara Westover'],
+        categories: ['Biography', 'Memoir', 'Non-fiction'],
+        description: 'A memoir about education and family in rural Idaho.',
+        rating: 4.4,
+        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
+        publishedDate: '2018'
+      },
+      {
+        id: '5',
+        title: 'The Midnight Library',
+        authors: ['Matt Haig'],
+        categories: ['Fiction', 'Fantasy', 'Philosophy'],
+        description: 'A novel about infinite possibilities and second chances.',
+        rating: 4.2,
+        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
+        publishedDate: '2020'
+      }
+    ];
   }
 
   /**
