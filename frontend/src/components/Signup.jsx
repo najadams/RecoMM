@@ -1,37 +1,37 @@
-import React, { useState } from 'react';
-import './Auth.css';
-import { useAuth } from '../contexts/AuthContext';
-import ladyReading from '../assets/ladyReading.png';
-import manReading from '../assets/kidBehindBook.png';
-import flyingWithBook from '../assets/flyingWithBook.png';
+import React, { useState } from "react";
+import "./Auth.css";
+import { useAuth } from "../contexts/AuthContext";
+import ladyReading from "../assets/ladyReading.png";
+import manReading from "../assets/kidBehindBook.png";
+import flyingWithBook from "../assets/flyingWithBook.png";
 
 const Signup = ({ onSwitchToLogin }) => {
   const { register } = useAuth();
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     // Client-side validation
     if (password !== confirmPassword) {
-      setError('Passwords do not match!');
+      setError("Passwords do not match!");
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+      setError("Password must be at least 6 characters long.");
       setLoading(false);
       return;
     }
@@ -39,10 +39,10 @@ const Signup = ({ onSwitchToLogin }) => {
     try {
       const formData = { email, username, password, confirmPassword };
       await register(formData);
-      setSuccess('Account created successfully! Redirecting to dashboard...');
+      setSuccess("Account created successfully! Redirecting to dashboard...");
       // User will be automatically redirected to dashboard via AuthContext
     } catch (error) {
-      setError(error.message || 'Registration failed. Please try again.');
+      setError(error.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,11 @@ const Signup = ({ onSwitchToLogin }) => {
       <div className="decorative-elements">
         <img src={ladyReading} alt="Lady reading" className="lady-reading" />
         <img src={manReading} alt="Man reading" className="man-reading" />
-        <img src={flyingWithBook} alt="Flying with book" className="flying-book" />
+        <img
+          src={flyingWithBook}
+          alt="Flying with book"
+          className="flying-book"
+        />
       </div>
 
       {/* Header */}
@@ -65,7 +69,7 @@ const Signup = ({ onSwitchToLogin }) => {
             <span className="club-text">CLUB</span>
           </div>
           <div className="logo-name-container">
-            <span className="logo-name">LOGO NAME</span>
+            <span className="logo-name">SmartReads</span>
           </div>
         </div>
       </header>
@@ -73,7 +77,7 @@ const Signup = ({ onSwitchToLogin }) => {
       {/* Main signup form */}
       <div className="auth-form-container">
         <div className="welcome-section">
-          <h1>welcome to logo name</h1>
+          <h1>welcome to SmartReads</h1>
           <p className="login-subtitle">SIGN UP TO CONTINUE</p>
         </div>
 
@@ -87,8 +91,8 @@ const Signup = ({ onSwitchToLogin }) => {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  if (error) setError('');
-                  if (success) setSuccess('');
+                  if (error) setError("");
+                  if (success) setSuccess("");
                 }}
                 required
               />
@@ -104,8 +108,8 @@ const Signup = ({ onSwitchToLogin }) => {
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
-                  if (error) setError('');
-                  if (success) setSuccess('');
+                  if (error) setError("");
+                  if (success) setSuccess("");
                 }}
                 required
               />
@@ -116,22 +120,21 @@ const Signup = ({ onSwitchToLogin }) => {
             <div className="input-wrapper">
               <span className="input-icon">🔒</span>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Create Password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (error) setError('');
-                  if (success) setSuccess('');
+                  if (error) setError("");
+                  if (success) setSuccess("");
                 }}
                 required
               />
               <button
                 type="button"
                 className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? '🙈' : '👁️'}
+                onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -140,22 +143,21 @@ const Signup = ({ onSwitchToLogin }) => {
             <div className="input-wrapper">
               <span className="input-icon">🔒</span>
               <input
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
-                  if (error) setError('');
-                  if (success) setSuccess('');
+                  if (error) setError("");
+                  if (success) setSuccess("");
                 }}
                 required
               />
               <button
                 type="button"
                 className="password-toggle"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? '🙈' : '👁️'}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                {showConfirmPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -163,24 +165,38 @@ const Signup = ({ onSwitchToLogin }) => {
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
-          <button type="submit" className="auth-button signup-button" disabled={loading}>
-            {loading ? 'SIGNING UP...' : 'SIGN UP'}
+          <button
+            type="submit"
+            className="auth-button signup-button"
+            disabled={loading}>
+            {loading ? "SIGNING UP..." : "SIGN UP"}
           </button>
 
           <div className="social-login">
             <p className="login-with">SIGN UP WITH</p>
             <div className="social-buttons">
-              <button type="button" className="social-btn google">G</button>
-              <button type="button" className="social-btn apple">🍎</button>
-              <button type="button" className="social-btn facebook">f</button>
-              <button type="button" className="social-btn twitter">X</button>
+              <button type="button" className="social-btn google">
+                G
+              </button>
+              <button type="button" className="social-btn apple">
+                🍎
+              </button>
+              <button type="button" className="social-btn facebook">
+                f
+              </button>
+              <button type="button" className="social-btn twitter">
+                X
+              </button>
             </div>
           </div>
         </form>
 
         <p className="switch-auth">
-          already have an account?{' '}
-          <button type="button" onClick={onSwitchToLogin} className="switch-link">
+          already have an account?{" "}
+          <button
+            type="button"
+            onClick={onSwitchToLogin}
+            className="switch-link">
             login
           </button>
         </p>
