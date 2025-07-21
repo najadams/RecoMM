@@ -75,23 +75,13 @@ const styles = `
     background: #ef4444;
   }
 
-  .reading-progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 8px;
-    color: white;
-  }
-
   .progress-bar {
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
     overflow: hidden;
-    margin-bottom: 4px;
+    margin-bottom: 1px;
   }
 
   .progress-fill {
@@ -553,6 +543,29 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
                                 e.target.src = 'https://via.placeholder.com/128x192/cccccc/666666?text=No+Cover';
                               }}
                             />
+                            
+                            {/* Status Badge */}
+                            <div className={`book-status-badge ${mapStatus(book.status)}`}>
+                              {book.status === 'want-to-read' ? 'SAVED' : 
+                               book.status === 'reading' ? 'READING' : 
+                               book.status === 'read' ? 'READ' : 
+                               book.status === 'did-not-finish' ? 'DNF' : book.status.toUpperCase()}
+                            </div>
+                            
+                            {/* Reading Progress */}
+                            {(book.readingProgress > 0 || book.progress > 0) && (
+                              <div>
+                                <div className="progress-bar">
+                                  <div 
+                                    className="progress-fill" 
+                                    style={{width: `${book.readingProgress || book.progress || 0}%`}}
+                                  ></div>
+                                </div>
+                                <div className="progress-text">
+                                  {Math.round(book.readingProgress || book.progress || 0)}%
+                                </div>
+                              </div>
+                            )}
                           </div>
                           
                           <div className="book-details">
