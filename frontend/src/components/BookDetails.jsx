@@ -37,7 +37,7 @@ const BookDetails = ({ book, onNavigate }) => {
       
       if (userBook) {
         setBookStatus(userBook.status);
-        setReadingProgress(userBook.progress || 0);
+        setReadingProgress(userBook.readingProgress || userBook.progress || 0);
         setUserRating(userBook.rating || 0);
       }
     } catch (error) {
@@ -220,10 +220,10 @@ const BookDetails = ({ book, onNavigate }) => {
                   )}
                 </div>
                 
-                {bookStatus === 'reading' && (
+                {(bookStatus === 'reading' || (readingProgress > 0 && bookStatus !== 'want-to-read')) && (
                   <div className="reading-progress">
                     <div className="progress-header">
-                      <span>Reading Progress</span>
+                      <span>{bookStatus === 'read' ? 'Completed' : 'Reading Progress'}</span>
                       <span>{Math.round(readingProgress)}%</span>
                     </div>
                     <div className="progress-bar">
@@ -232,14 +232,26 @@ const BookDetails = ({ book, onNavigate }) => {
                         style={{width: `${readingProgress}%`}}
                       ></div>
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={readingProgress}
-                      onChange={(e) => handleProgressChange(parseInt(e.target.value))}
-                      className="progress-slider"
-                    />
+                    {bookStatus === 'reading' && (
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={readingProgress}
+                        onChange={(e) => handleProgressChange(parseInt(e.target.value))}
+                        className="progress-slider"
+                      />
+                    )}
+                    {bookStatus === 'read' && readingProgress === 100 && (
+                      <div className="completion-badge">
+                        ✅ Book Completed!
+                      </div>
+                    )}
+                    {bookStatus === 'did-not-finish' && (
+                      <div className="dnf-badge">
+                        📚 Did not finish at {Math.round(readingProgress)}%
+                      </div>
+                    )}
                   </div>
                 )}
                 
