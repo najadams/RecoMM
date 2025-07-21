@@ -64,13 +64,13 @@ const Header = ({ currentView, onNavigate }) => {
         >
           My Books
         </a>
-        <a 
+        {/* <a 
           href="#" 
           className={`nav-link ${currentView === 'feedback' ? 'active' : ''}`} 
           onClick={(e) => { e.preventDefault(); onNavigate('feedback'); }}
         >
           Feedback
-        </a>
+        </a> */}
         <a 
           href="#" 
           className={`nav-link ${currentView === 'contactus' ? 'active' : ''}`} 
