@@ -505,62 +505,120 @@ class AIRecommendationService {
   }
 
   /**
-   * Get mock books for testing (replace with actual book database integration)
-   * @returns {Array} Mock book data
+   * Get books from Google Books API for recommendations
+   * @returns {Array} Real book data from Google Books API
    */
   async getMockBooks() {
-    return [
-      {
-        id: '1',
-        title: 'The Seven Husbands of Evelyn Hugo',
-        authors: ['Taylor Jenkins Reid'],
-        categories: ['Fiction', 'Romance', 'Historical Fiction'],
-        description: 'A reclusive Hollywood icon finally tells her story.',
-        rating: 4.5,
-        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
-        publishedDate: '2017'
-      },
-      {
-        id: '2',
-        title: 'Dune',
-        authors: ['Frank Herbert'],
-        categories: ['Science Fiction', 'Fantasy'],
-        description: 'A epic science fiction novel set on the desert planet Arrakis.',
-        rating: 4.3,
-        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
-        publishedDate: '1965'
-      },
-      {
-        id: '3',
-        title: 'The Silent Patient',
-        authors: ['Alex Michaelides'],
-        categories: ['Mystery', 'Thriller', 'Psychological Fiction'],
-        description: 'A psychological thriller about a woman who refuses to speak.',
-        rating: 4.1,
-        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
-        publishedDate: '2019'
-      },
-      {
-        id: '4',
-        title: 'Educated',
-        authors: ['Tara Westover'],
-        categories: ['Biography', 'Memoir', 'Non-fiction'],
-        description: 'A memoir about education and family in rural Idaho.',
-        rating: 4.4,
-        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
-        publishedDate: '2018'
-      },
-      {
-        id: '5',
-        title: 'The Midnight Library',
-        authors: ['Matt Haig'],
-        categories: ['Fiction', 'Fantasy', 'Philosophy'],
-        description: 'A novel about infinite possibilities and second chances.',
-        rating: 4.2,
-        thumbnail: 'https://via.placeholder.com/128x192/cccccc/666666?text=Book+Cover',
-        publishedDate: '2020'
+    try {
+      // Use real Google Books API to get popular books
+      const queries = [
+        'bestseller fiction 2023',
+        'popular science fiction',
+        'award winning books',
+        'classic literature',
+        'mystery thriller'
+      ];
+      
+      const allBooks = [];
+      
+      for (const query of queries) {
+        try {
+          const response = await axios.get(`https://www.googleapis.com/books/v1/volumes`, {
+            params: {
+              q: query,
+              maxResults: 8,
+              printType: 'books',
+              langRestrict: 'en'
+            }
+          });
+          
+          if (response.data.items) {
+            const books = response.data.items.map(item => ({
+              id: item.id,
+              title: item.volumeInfo.title || 'Unknown Title',
+              authors: item.volumeInfo.authors || ['Unknown Author'],
+              categories: item.volumeInfo.categories || ['General'],
+              description: item.volumeInfo.description || 'No description available.',
+              rating: item.volumeInfo.averageRating || 4.0,
+              ratingsCount: item.volumeInfo.ratingsCount || 0,
+              thumbnail: item.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/128x192/cccccc/666666?text=No+Cover',
+              publishedDate: item.volumeInfo.publishedDate || 'Unknown',
+              pageCount: item.volumeInfo.pageCount || 0,
+              language: item.volumeInfo.language || 'en',
+              publisher: item.volumeInfo.publisher || 'Unknown Publisher'
+            }));
+            
+            allBooks.push(...books);
+          }
+        } catch (queryError) {
+          console.warn(`Failed to fetch books for query "${query}":`, queryError.message);
+        }
       }
-    ];
+      
+      // Remove duplicates and return up to 40 books
+      const uniqueBooks = allBooks.filter((book, index, self) => 
+        index === self.findIndex(b => b.id === book.id)
+      );
+      
+      return uniqueBooks.slice(0, 40);
+      
+    } catch (error) {
+      console.error('Error fetching books from Google Books API:', error);
+      
+      // Fallback to a smaller set of real Google Books IDs if API fails
+      return [
+        {
+          id: 'nggnmAEACAAJ',
+          title: 'The Seven Husbands of Evelyn Hugo',
+          authors: ['Taylor Jenkins Reid'],
+          categories: ['Fiction', 'Romance', 'Historical Fiction'],
+          description: 'A reclusive Hollywood icon finally tells her story.',
+          rating: 4.5,
+          thumbnail: 'https://books.google.com/books/content?id=nggnmAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+          publishedDate: '2017'
+        },
+        {
+          id: 'B1hSG45JCX4C',
+          title: 'Dune',
+          authors: ['Frank Herbert'],
+          categories: ['Science Fiction', 'Fantasy'],
+          description: 'A epic science fiction novel set on the desert planet Arrakis.',
+          rating: 4.3,
+          thumbnail: 'https://books.google.com/books/content?id=B1hSG45JCX4C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+          publishedDate: '1965'
+        },
+        {
+          id: 'niBbDwAAQBAJ',
+          title: 'The Silent Patient',
+          authors: ['Alex Michaelides'],
+          categories: ['Mystery', 'Thriller', 'Psychological Fiction'],
+          description: 'A psychological thriller about a woman who refuses to speak.',
+          rating: 4.1,
+          thumbnail: 'https://books.google.com/books/content?id=niBbDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+          publishedDate: '2019'
+        },
+        {
+          id: 'KJ1DAjdHFLAC',
+          title: 'Educated',
+          authors: ['Tara Westover'],
+          categories: ['Biography', 'Memoir', 'Non-fiction'],
+          description: 'A memoir about education and family in rural Idaho.',
+          rating: 4.4,
+          thumbnail: 'https://books.google.com/books/content?id=KJ1DAjdHFLAC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+          publishedDate: '2018'
+        },
+        {
+          id: '2XznDwAAQBAJ',
+          title: 'The Midnight Library',
+          authors: ['Matt Haig'],
+          categories: ['Fiction', 'Fantasy', 'Philosophy'],
+          description: 'A novel about infinite possibilities and second chances.',
+          rating: 4.2,
+          thumbnail: 'https://books.google.com/books/content?id=2XznDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+          publishedDate: '2020'
+        }
+      ];
+    }
   }
 
   /**

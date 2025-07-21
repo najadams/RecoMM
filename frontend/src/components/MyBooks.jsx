@@ -274,8 +274,15 @@ const MyBooks = ({ onNavigate, initialFilter = 'all' }) => {
         return book;
       }
       
-      // Fetch external book details using the bookId
-      const externalDetails = await getBookDetails(book.bookId);
+      // Use either bookId (from reading history) or id (from AI recommendations)
+      const bookIdentifier = book.bookId || book.id;
+      if (!bookIdentifier) {
+        console.warn('Book has no identifier (bookId or id):', book);
+        return book;
+      }
+      
+      // Fetch external book details using the book identifier
+      const externalDetails = await getBookDetails(bookIdentifier);
       
       // Merge external details with existing book data, prioritizing external data for missing fields
       return {

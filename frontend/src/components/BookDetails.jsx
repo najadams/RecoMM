@@ -33,7 +33,10 @@ const BookDetails = ({ book, onNavigate }) => {
     try {
       // Check if user has this book in their reading history
       const response = await apiService.getReadingHistory();
-      const userBook = response.readingHistory?.find(b => b.bookId === book.id);
+      // Handle both bookId (from reading history) and id (from AI recommendations)
+      const userBook = response.readingHistory?.find(b => 
+        b.bookId === book.id || b.id === book.id || b.bookId === book.bookId
+      );
       
       if (userBook) {
         setBookStatus(userBook.status);
